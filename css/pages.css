@@ -1495,7 +1495,7 @@
 .area-chart-svg {
     width: 100%;
     min-width: 400px;
-    height: auto;
+    height: 280px;
 }
 
 .area-fill {
