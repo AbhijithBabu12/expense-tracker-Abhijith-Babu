@@ -108,6 +108,8 @@ export function navigateTo(pageName) {
         targetPage.classList.add("active");
     }
 
+    document.body.setAttribute("data-active-page", pageName);
+
     document
         .querySelectorAll(".nav-link")
         .forEach(link => {

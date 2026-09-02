@@ -382,6 +382,23 @@
 @media (max-width: 700px) {
 
 
+    .nav-link[data-page="ai"] {
+        display: none;
+    }
+
+    body[data-active-page="ai"] .mobile-ai-button {
+        display: none;
+    }
+
+
+    body[data-active-page="ai"] .ai-chat-toolbar {
+        padding: 20px 0 6px;
+    }
+
+    body[data-active-page="ai"] .ai-mobile-back {
+        display: block;
+    }
+
     .ai-new-chat {
         padding:
             8px 10px;
@@ -389,8 +406,10 @@
 
 
     .ai-messages {
+        width: 100%;
         padding:
-            30px 18px 150px;
+            10px 18px 150px;
+        box-sizing: border-box;
     }
 
 
@@ -428,7 +447,8 @@
 
 
     .ai-message-content {
-        max-width: 85%;
+        max-width: 100%;
+        min-width: 0;
     }
 
 

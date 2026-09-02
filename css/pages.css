@@ -1599,9 +1599,22 @@
     padding: 110px 0 10px;
 
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
 
     flex-shrink: 0;
+}
+
+.ai-mobile-back {
+    display: none;
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 0;
 }
 
 .ai-new-chat {
