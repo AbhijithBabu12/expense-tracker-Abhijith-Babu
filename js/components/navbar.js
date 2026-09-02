@@ -14,7 +14,12 @@ const pages = [
     {
         id: "dashboard",
         label: "Dashboard"
+    },
+    {
+        id: "ai",
+        label: "✦ AI Mode"
     }
+
 ];
 
 
@@ -34,6 +39,7 @@ export function renderNavbar() {
 
                 ${pages.map(page => `
                     <button
+                        type="button"
                         class="nav-link ${page.id === "home" ? "active" : ""}"
                         data-page="${page.id}"
                     >
@@ -47,6 +53,7 @@ export function renderNavbar() {
     `;
 
     setupNavigation();
+    setupMobileAI();
 }
 
 
@@ -66,6 +73,23 @@ function setupNavigation() {
         });
 
     });
+}
+
+function setupMobileAI() {
+
+    const button =
+        document.getElementById("mobile-ai-button");
+
+    if (!button) {
+        return;
+    }
+
+    button.addEventListener("click", () => {
+
+        navigateTo("ai");
+
+    });
+
 }
 
 

@@ -326,3 +326,55 @@
 .text-button:hover {
     text-decoration: underline;
 }
+
+/* =========================================
+   MOBILE AI BUTTON
+========================================= */
+
+.mobile-ai-button {
+    position: fixed;
+
+    right: 20px;
+    bottom: 20px;
+
+    z-index: 1000;
+
+    width: 54px;
+    height: 54px;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 50%;
+
+    background: var(--color-text-primary);
+    color: white;
+
+    font-size: 22px;
+
+    cursor: pointer;
+
+    box-shadow: var(--shadow-card);
+
+    transition:
+        transform var(--transition-fast),
+        opacity var(--transition-fast);
+}
+
+.mobile-ai-button:hover {
+    transform: translateY(-2px);
+}
+
+.mobile-ai-button:active {
+    transform: scale(0.95);
+}
+
+@media (max-width: 700px) {
+
+    .mobile-ai-button {
+        display: flex;
+    }
+
+}

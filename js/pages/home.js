@@ -6,38 +6,8 @@ import {
     validateTransaction
 } from "../core/validation.js";
 
-import {
-    getCategories,
-    saveCategories
-} from "../data/storage.js";
-
-import {
-    showNotification
-} from "../components/notifications.js";
-
 
 let transactionType = "expense";
-
-const categoryOptions = {
-    expense: [
-        "Food",
-        "Transport",
-        "Shopping",
-        "Bills",
-        "Entertainment",
-        "Health",
-        "Other"
-    ],
-    income: [
-        "Salary",
-        "Freelance",
-        "Business",
-        "Investment",
-        "Gift",
-        "Other"
-    ]
-};
-
 
 
 export function initializeHome() {
@@ -47,9 +17,6 @@ export function initializeHome() {
 
     const dateInput =
         document.getElementById("date");
-
-    const timeInput =
-        document.getElementById("time");
 
     const typeButtons =
         document.querySelectorAll(".type-button");
@@ -68,14 +35,11 @@ export function initializeHome() {
     dateInput.value =
         new Date().toISOString().split("T")[0];
 
-    // Default time = now
-    timeInput.value =
-        new Date().toTimeString().substring(0, 5);
 
-    renderCategoryOptions(categorySelect);
-
-
+    // --------------------------------
     // Expense / Income toggle
+    // --------------------------------
+
     typeButtons.forEach(button => {
 
         button.addEventListener("click", () => {
@@ -89,53 +53,74 @@ export function initializeHome() {
             transactionType =
                 button.dataset.type;
 
-            renderCategoryOptions(categorySelect);
-
-            hideCustomCategory(
-                customCategoryGroup,
-                customCategoryInput
-            );
-
         });
 
     });
 
+
+    // --------------------------------
+    // Category → Other
+    // --------------------------------
+
     categorySelect.addEventListener("change", () => {
 
-        const isCustomCategory =
+        const isOther =
             categorySelect.value === "Other";
 
-        toggleCustomCategory(
-            customCategoryGroup,
-            customCategoryInput,
-            isCustomCategory
+
+        customCategoryGroup.classList.toggle(
+            "hidden",
+            !isOther
         );
+
+
+        if (!isOther) {
+            customCategoryInput.value = "";
+        }
 
     });
 
 
+    // --------------------------------
     // Form submission
+    // --------------------------------
+
     form.addEventListener("submit", event => {
 
         event.preventDefault();
 
+
         const formData =
             new FormData(form);
 
-        const selectedCategory =
+
+        let category =
             formData.get("category");
 
-        const customCategory =
-            formData.get("custom-category")
-                ?.trim();
 
-        const category =
-            selectedCategory === "Other" &&
-            customCategory
-                ? customCategory
-                : selectedCategory === "Other"
-                    ? ""
-                    : selectedCategory;
+        // If Other is selected,
+        // use the manually entered category
+        if (category === "Other") {
+
+            const customCategory =
+                customCategoryInput.value.trim();
+
+
+            if (!customCategory) {
+
+                alert(
+                    "Please enter a custom category."
+                );
+
+                customCategoryInput.focus();
+
+                return;
+            }
+
+
+            category = customCategory;
+        }
+
 
         const data = {
 
@@ -144,13 +129,10 @@ export function initializeHome() {
             amount:
                 formData.get("amount"),
 
-            category,
+            category: category,
 
             date:
                 formData.get("date"),
-
-            time:
-                formData.get("time"),
 
             description:
                 formData.get("description")
@@ -158,28 +140,50 @@ export function initializeHome() {
         };
 
 
+        // --------------------------------
+        // Validation
+        // --------------------------------
+
         const validation =
             validateTransaction(data);
 
 
         if (!validation.valid) {
 
-            showNotification(
+            alert(
                 Object.values(validation.errors)
-                    .join(" "),
-                "error"
+                    .join("\n")
             );
 
             return;
         }
 
 
-        saveCustomCategory(category);
+        // --------------------------------
+        // Save transaction
+        // --------------------------------
 
         createTransaction(data);
 
 
+        // Tell the rest of the application
+        // that transaction data changed
+        window.dispatchEvent(
+            new CustomEvent("transactionsChanged")
+        );
+
+
+        // --------------------------------
+        // Reset form
+        // --------------------------------
+
         form.reset();
+
+
+        // Hide custom category
+        customCategoryGroup.classList.add("hidden");
+
+        customCategoryInput.value = "";
 
 
         // Restore today's date
@@ -188,16 +192,10 @@ export function initializeHome() {
                 .toISOString()
                 .split("T")[0];
 
-        // Restore current time
-        timeInput.value =
-            new Date()
-                .toTimeString()
-                .substring(0, 5);
 
-        customCategoryGroup.classList.add("hidden");
-
-        customCategoryInput.required = false;
+        // Restore expense
         transactionType = "expense";
+
 
         typeButtons.forEach(button => {
 
@@ -208,71 +206,9 @@ export function initializeHome() {
 
         });
 
-        renderCategoryOptions(categorySelect);
 
-
-        showNotification(
-            "Transaction added successfully."
-        );
+        alert("Transaction added successfully.");
 
     });
-
-}
-
-
-function renderCategoryOptions(select) {
-
-    select.innerHTML = `
-        <option value="">Select category</option>
-        ${categoryOptions[transactionType]
-            .map(category => `
-                <option value="${category}">${category}</option>
-            `)
-            .join("")}
-    `;
-
-}
-
-
-function hideCustomCategory(group, input) {
-
-    toggleCustomCategory(group, input, false);
-
-}
-
-
-function toggleCustomCategory(group, input, shouldShow) {
-
-    group.classList.toggle(
-        "hidden",
-        !shouldShow
-    );
-
-    input.required = shouldShow;
-
-    if (!shouldShow) {
-        input.value = "";
-    }
-
-}
-
-
-function saveCustomCategory(category) {
-
-    if (!category) {
-        return;
-    }
-
-    const categories =
-        getCategories();
-
-    if (categories.includes(category)) {
-        return;
-    }
-
-    saveCategories([
-        ...categories,
-        category
-    ]);
 
 }
