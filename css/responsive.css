@@ -224,27 +224,44 @@
 
 @media (max-width: 520px) {
 
+    #navbar {
+        width: calc(100% - 24px);
+        top: 16px;
+    }
+
     .navbar {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 14px;
+        padding: 8px 12px;
+        align-items: center;
+        flex-direction: row;
+        gap: 12px;
+    }
+
+    .logo span {
+        display: none;
     }
 
     .logo img {
-        width: 40px;
-        height: 40px;
+        width: 36px;
+        height: 36px;
     }
 
     .nav-links {
-        width: 100%;
-
+        width: auto;
+        flex: 1;
         overflow-x: auto;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .nav-links::-webkit-scrollbar {
+        display: none;
     }
 
     .nav-link {
         padding: 6px 10px;
 
-        font-size: 12px;
+        font-size: 13px;
 
         white-space: nowrap;
     }
