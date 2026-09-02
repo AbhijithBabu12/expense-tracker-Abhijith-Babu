@@ -1029,205 +1029,116 @@ function scrollMessagesToBottom() {
 
 function renderMarkdown(markdown) {
 
-    let html =
-        escapeHTML(markdown);
+    /*
+     * Compress excessive newlines first so we don't
+     * get massive gaps in the UI.
+     */
+    let html = escapeHTML(markdown)
+        .replace(/\r\n/g, "\n")
+        .replace(/\n{3,}/g, "\n\n");
 
 
     /*
      * Tables
      */
-
     html = html.replace(
         /((?:\|.*\|\n)+)/g,
         match => {
+            const lines = match.trim().split("\n").map(line => line.trim()).filter(Boolean);
+            if (lines.length < 2) return match;
 
-            const lines =
-                match
-                    .trim()
-                    .split("\n")
-                    .map(line =>
-                        line.trim()
-                    )
-                    .filter(Boolean);
+            const rows = lines
+                .filter(line => !/^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|?$/.test(line))
+                .map(line => line.replace(/^\||\|$/g, "").split("|").map(cell => cell.trim()));
 
+            if (!rows.length) return match;
 
-            if (lines.length < 2) {
-                return match;
-            }
-
-
-            const rows =
-                lines
-                    .filter(line =>
-                        !/^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|?$/.test(line)
-                    )
-                    .map(line => {
-
-                        return line
-                            .replace(
-                                /^\||\|$/g,
-                                ""
-                            )
-                            .split("|")
-                            .map(cell =>
-                                cell.trim()
-                            );
-
-                    });
-
-
-            if (!rows.length) {
-                return match;
-            }
-
-
-            const header =
-                rows[0];
-
-            const body =
-                rows.slice(1);
-
+            const header = rows[0];
+            const body = rows.slice(1);
 
             return `
                 <div class="ai-table-wrapper">
-
                     <table class="ai-table">
-
                         <thead>
-
                             <tr>
-                                ${header.map(cell => `
-                                    <th>
-                                        ${cell}
-                                    </th>
-                                `).join("")}
+                                ${header.map(cell => `<th>${cell}</th>`).join("")}
                             </tr>
-
                         </thead>
-
                         <tbody>
-
                             ${body.map(row => `
                                 <tr>
-                                    ${row.map(cell => `
-                                        <td>
-                                            ${cell}
-                                        </td>
-                                    `).join("")}
+                                    ${row.map(cell => `<td>${cell}</td>`).join("")}
                                 </tr>
                             `).join("")}
-
                         </tbody>
-
                     </table>
-
                 </div>
             `;
-
         }
     );
 
 
     /*
-     * Bold
+     * Bold and Italic
      */
-
-    html = html.replace(
-        /\*\*(.*?)\*\*/g,
-        "<strong>$1</strong>"
-    );
-
-
-    /*
-     * Italic
-     */
-
-    html = html.replace(
-        /(?<!\*)\*([^*\n]+)\*(?!\*)/g,
-        "<em>$1</em>"
-    );
+    html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    html = html.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, "<em>$1</em>");
 
 
     /*
      * Headings
      */
-
-    html = html.replace(
-        /^### (.+)$/gm,
-        "<h4>$1</h4>"
-    );
-
-    html = html.replace(
-        /^## (.+)$/gm,
-        "<h3>$1</h3>"
-    );
-
-    html = html.replace(
-        /^# (.+)$/gm,
-        "<h2>$1</h2>"
-    );
+    html = html.replace(/^### (.+)$/gm, "<h4>$1</h4>");
+    html = html.replace(/^## (.+)$/gm, "<h3>$1</h3>");
+    html = html.replace(/^# (.+)$/gm, "<h2>$1</h2>");
 
 
     /*
      * Numbered lists
+     * Tolerates blank lines between items by matching block of lists
      */
-
     html = html.replace(
-        /(?:^|\n)((?:\d+\.\s+.+(?:\n|$))+)/g,
+        /(?:^|\n)((?:(?:\d+\.\s+.+)(?:\n|$)+)+)/g,
         match => {
+            const items = match
+                .trim()
+                .split(/\n+/)
+                .map(line => line.trim())
+                .filter(line => /^\d+\.\s+/.test(line))
+                .map(line => line.replace(/^\d+\.\s+/, ""));
 
-            const items =
-                match
-                    .trim()
-                    .split("\n")
-                    .map(line =>
-                        line.replace(
-                            /^\d+\.\s+/,
-                            ""
-                        )
-                    );
-
+            if (!items.length) return match;
 
             return `
                 <ol>
-                    ${items.map(item => `
-                        <li>${item}</li>
-                    `).join("")}
+                    ${items.map(item => `<li>${item}</li>`).join("")}
                 </ol>
             `;
-
         }
     );
 
 
     /*
      * Bullet lists
+     * Tolerates blank lines between items by matching block of lists
      */
-
     html = html.replace(
-        /(?:^|\n)((?:[-*]\s+.+(?:\n|$))+)/g,
+        /(?:^|\n)((?:(?:[-*]\s+.+)(?:\n|$)+)+)/g,
         match => {
+            const items = match
+                .trim()
+                .split(/\n+/)
+                .map(line => line.trim())
+                .filter(line => /^[-*]\s+/.test(line))
+                .map(line => line.replace(/^[-*]\s+/, ""));
 
-            const items =
-                match
-                    .trim()
-                    .split("\n")
-                    .map(line =>
-                        line.replace(
-                            /^[-*]\s+/,
-                            ""
-                        )
-                    );
-
+            if (!items.length) return match;
 
             return `
                 <ul>
-                    ${items.map(item => `
-                        <li>${item}</li>
-                    `).join("")}
+                    ${items.map(item => `<li>${item}</li>`).join("")}
                 </ul>
             `;
-
         }
     );
 
@@ -1235,73 +1146,38 @@ function renderMarkdown(markdown) {
     /*
      * Paragraphs
      */
+    html = html
+        .split(/\n{2,}/)
+        .map(block => {
+            block = block.trim();
+            if (!block) return "";
 
-    html =
-        html
-            .split(/\n{2,}/)
-            .map(block => {
+            if (
+                block.startsWith("<h") ||
+                block.startsWith("<ul") ||
+                block.startsWith("<ol") ||
+                block.startsWith("<div")
+            ) {
+                return block;
+            }
 
-                block =
-                    block.trim();
-
-
-                if (!block) {
-                    return "";
-                }
-
-
-                if (
-                    block.startsWith("<h") ||
-                    block.startsWith("<ul") ||
-                    block.startsWith("<ol") ||
-                    block.startsWith("<div")
-                ) {
-
-                    return block;
-
-                }
-
-
-                return `
-                    <p>
-                        ${block.replace(
-                            /\n/g,
-                            "<br>"
-                        )}
-                    </p>
-                `;
-
-            })
-            .join("");
-
+            return `
+                <p>
+                    ${block.replace(/\n/g, "<br>")}
+                </p>
+            `;
+        })
+        .join("");
 
     return html;
-
 }
 
 
 function escapeHTML(value) {
-
     return String(value)
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
-
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
