@@ -20,7 +20,7 @@
     }
 
     .home-container {
-        padding: 64px 16px 48px;
+        padding: 120px 16px 48px;
     }
 
     .page-intro h1 {
@@ -53,7 +53,7 @@
     .history-container,
     .analytics-container,
     .dashboard-container {
-        padding: 60px 18px;
+        padding: 120px 18px 60px;
     }
 
     .page-header {
@@ -257,7 +257,7 @@
     .history-container,
     .analytics-container,
     .dashboard-container {
-        padding-top: 44px;
+        padding-top: 140px;
     }
 
     .modal-backdrop {
