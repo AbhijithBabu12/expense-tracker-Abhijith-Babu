@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta
+      name="description"
+      content="Meowth - a simple, intelligent personal finance tracker."
+    />
+
+    <title>Meowth - Personal Finance</title>
+
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/global.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/pages.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+  </head>
+
+  <body>
+    <div id="app">
+      <!-- Navigation -->
+      <header id="navbar"></header>
+
+      <!-- Main application -->
+      <main id="main-content">
+        <!-- Home page -->
+        <section
+          id="home-page"
+          class="page active"
+          aria-labelledby="home-title"
+        >
+          <div class="home-container">
+            <div class="page-intro">
+              <p class="eyebrow">PERSONAL FINANCE</p>
+
+              <h1 id="home-title">
+                Take control of<br />
+                your spending.
+              </h1>
+
+              <p class="page-subtitle">
+                Keep track of your money without the clutter.
+              </p>
+            </div>
+
+            <!-- Transaction form -->
+            <div class="transaction-card">
+              <div class="transaction-type">
+                <button
+                  type="button"
+                  class="type-button active"
+                  data-type="expense"
+                >
+                  Expense
+                </button>
+
+                <button type="button" class="type-button" data-type="income">
+                  Income
+                </button>
+              </div>
+
+              <form id="transaction-form" novalidate>
+                <!-- Amount -->
+                <div class="form-group amount-group">
+                  <label for="amount"> Amount </label>
+
+                  <div class="amount-input-wrapper">
+                    <span class="currency-symbol">₹</span>
+
+                    <input
+                      type="number"
+                      id="amount"
+                      name="amount"
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <!-- Category -->
+                  <div class="form-group">
+                    <label for="category"> Category </label>
+
+                    <select id="category" name="category" required>
+                      <option value="">Select category</option>
+
+                      <option value="Food">Food</option>
+
+                      <option value="Transport">Transport</option>
+
+                      <option value="Shopping">Shopping</option>
+
+                      <option value="Bills">Bills</option>
+
+                      <option value="Entertainment">Entertainment</option>
+
+                      <option value="Health">Health</option>
+
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+
+                  <!-- Custom Category -->
+
+                  <div class="form-group hidden" id="custom-category-group">
+                    <label for="custom-category"> Custom category </label>
+                    <input
+                      type="text"
+                      id="custom-category"
+                      name="custom-category"
+                      placeholder="e.g. Pet care"
+                      maxlength="50"
+                    />
+                  </div>
+
+                  <!-- Date & Time -->
+                  <div class="form-group">
+                    <label> Date & Time </label>
+
+                    <div class="date-time-row">
+                      <input type="date" id="date" name="date" required />
+
+                      <input type="time" id="time" name="time" required />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                  <label for="description"> Description </label>
+
+                  <input
+                    type="text"
+                    id="description"
+                    name="description"
+                    placeholder="What was this transaction for?"
+                    maxlength="150"
+                  />
+                </div>
+
+                <button type="submit" class="primary-button">
+                  Add transaction
+                </button>
+              </form>
+            </div>
+
+            <!-- Import -->
+            <div class="import-section">
+              <span>Already have your expenses?</span>
+
+              <button
+                type="button"
+                class="text-button"
+                id="import-excel-button"
+              >
+                Import from Excel →
+              </button>
+
+              <input
+                type="file"
+                id="excel-input"
+                accept=".xlsx,.xls,.csv"
+                hidden
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- History page -->
+        <section id="history-page" class="page" aria-labelledby="history-title">
+          <div class="history-container">
+            <div class="page-header">
+              <div>
+                <p class="eyebrow">TRANSACTIONS</p>
+
+                <h2 id="history-title">Your history.</h2>
+
+                <p class="page-subtitle">Everything you've earned and spent.</p>
+              </div>
+
+              <div class="transaction-count">
+                <span id="transaction-count">0</span>
+                transactions
+              </div>
+            </div>
+
+            <!-- Search and filters -->
+
+            <div class="history-controls">
+              <div class="search-wrapper">
+                <span class="search-icon">⌕</span>
+
+                <input
+                  type="search"
+                  id="transaction-search"
+                  placeholder="Search transactions..."
+                  autocomplete="off"
+                />
+              </div>
+
+              <div class="filter-group">
+                <button
+                  type="button"
+                  class="filter-button active"
+                  data-filter-type="all"
+                >
+                  All
+                </button>
+
+                <button
+                  type="button"
+                  class="filter-button"
+                  data-filter-type="expense"
+                >
+                  Expenses
+                </button>
+
+                <button
+                  type="button"
+                  class="filter-button"
+                  data-filter-type="income"
+                >
+                  Income
+                </button>
+              </div>
+
+              <select id="category-filter" class="category-filter">
+                <option value="all">All categories</option>
+              </select>
+
+              <div class="export-actions">
+                <button
+                  type="button"
+                  class="secondary-button compact-button"
+                  id="export-excel-button"
+                >
+                  Export Excel
+                </button>
+
+                <button
+                  type="button"
+                  class="secondary-button compact-button"
+                  id="export-pdf-button"
+                >
+                  Export PDF
+                </button>
+              </div>
+            </div>
+
+            <!-- Transactions -->
+
+            <div id="transaction-list" class="transaction-list"></div>
+
+            <!-- Empty state -->
+
+            <div id="history-empty" class="empty-state hidden">
+              <div class="empty-icon">✦</div>
+
+              <h3>No transactions found.</h3>
+
+              <p>Try changing your search or filters.</p>
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="analytics-page"
+          class="page"
+          aria-labelledby="analytics-title"
+        >
+          <div class="analytics-container">
+            <div class="page-header">
+              <div>
+                <p class="eyebrow">ANALYTICS</p>
+
+                <h2 id="analytics-title">Money patterns.</h2>
+
+                <p class="page-subtitle">
+                  Verified totals, categories, and trends from your transactions.
+                </p>
+              </div>
+
+              <div class="analytics-periods" aria-label="Analytics period">
+                <button
+                  type="button"
+                  class="period-button active"
+                  data-period="today"
+                >
+                  Today
+                </button>
+
+                <button type="button" class="period-button" data-period="week">
+                  Week
+                </button>
+
+                <button type="button" class="period-button" data-period="month">
+                  Month
+                </button>
+
+                <button type="button" class="period-button" data-period="year">
+                  Year
+                </button>
+
+                <button type="button" class="period-button" data-period="all">
+                  All
+                </button>
+              </div>
+            </div>
+
+            <div id="analytics-content"></div>
+          </div>
+        </section>
+
+        <section
+          id="dashboard-page"
+          class="page"
+          aria-labelledby="dashboard-title"
+        >
+          <div class="dashboard-container">
+            <div class="page-header">
+              <div>
+                <p class="eyebrow">PERSONAL DASHBOARD</p>
+
+                <h2 id="dashboard-title">Your overview.</h2>
+
+                <p class="page-subtitle">
+                  A clear snapshot of your income, expenses, and balance.
+                </p>
+              </div>
+            </div>
+
+            <div id="dashboard-content"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Application -->
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>

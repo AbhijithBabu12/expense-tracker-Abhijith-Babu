@@ -1,0 +1,313 @@
+@media (max-width: 700px) {
+
+    .navbar {
+        padding: 16px 18px;
+    }
+
+    .logo img {
+        width: 42px;
+        height: 42px;
+    }
+
+    .nav-links {
+        gap: 2px;
+    }
+
+    .nav-link {
+        padding: 7px 9px;
+
+        font-size: 12px;
+    }
+
+    .home-container {
+        padding: 64px 16px 48px;
+    }
+
+    .page-intro h1 {
+        font-size: 44px;
+
+        letter-spacing: 0;
+    }
+
+    .transaction-card {
+        padding: 22px;
+
+        border-radius: 20px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .date-time-row {
+        grid-template-columns: 1fr;
+    }
+
+    .import-section {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 800px) {
+
+    .history-container,
+    .analytics-container,
+    .dashboard-container {
+        padding: 60px 18px;
+    }
+
+    .page-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        margin-bottom: 32px;
+    }
+
+    .history-controls {
+        grid-template-columns: 1fr;
+
+        gap: 12px;
+    }
+
+    .filter-group {
+        justify-content: center;
+    }
+
+    .category-filter {
+        width: 100%;
+    }
+
+    .export-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .compact-button {
+        width: 100%;
+    }
+
+    .transaction-item {
+        grid-template-columns: 1fr auto;
+
+        gap: 8px 16px;
+
+        padding: 16px 0;
+    }
+
+    .transaction-date {
+        grid-column: 1;
+
+        grid-row: 1;
+
+        font-size: 12px;
+    }
+
+    .transaction-main {
+        grid-column: 1;
+
+        grid-row: 2;
+    }
+
+    .transaction-type-label {
+        display: none;
+    }
+
+    .transaction-amount {
+        grid-column: 2;
+
+        grid-row: 1 / span 2;
+
+        align-self: center;
+    }
+
+    .transaction-actions {
+        opacity: 1;
+
+        grid-column: 1;
+
+        grid-row: 3;
+
+        justify-content: flex-start;
+
+        margin-left: 50px;
+    }
+
+    .analytics-periods {
+        flex-wrap: wrap;
+
+        border-radius: 18px;
+    }
+
+    .period-button {
+        flex: 1 1 auto;
+    }
+
+    .analytics-grid,
+    .analytics-columns,
+    .savings-panel,
+    .dashboard-hero,
+    .dashboard-metrics,
+    .dashboard-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-hero h3 {
+        font-size: 28px;
+    }
+
+    .monthly-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .metric-card {
+        min-height: 130px;
+    }
+
+    .metric-card strong {
+        font-size: 30px;
+    }
+
+    .top-expense-item {
+        grid-template-columns: 30px minmax(0, 1fr);
+    }
+
+    .top-expense-item b {
+        grid-column: 2;
+    }
+
+    .comparison-row {
+        grid-template-columns: 1fr;
+
+        gap: 8px;
+    }
+
+    .comparison-row strong {
+        text-align: left;
+    }
+
+    /* New charts responsive */
+
+    .donut-chart-content {
+        grid-template-columns: 1fr;
+
+        justify-items: center;
+
+        gap: 24px;
+    }
+
+    .donut-legend {
+        width: 100%;
+    }
+
+    .area-chart-panel .panel-heading {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .heatmap-grid {
+        gap: 4px;
+    }
+
+    .heatmap-cell {
+        border-radius: 8px;
+    }
+
+    .heatmap-cell-day {
+        font-size: 10px;
+    }
+
+    .area-chart-svg {
+        min-width: 320px;
+    }
+}
+
+@media (max-width: 520px) {
+
+    .navbar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .logo img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .nav-links {
+        width: 100%;
+
+        overflow-x: auto;
+    }
+
+    .nav-link {
+        padding: 6px 10px;
+
+        font-size: 12px;
+
+        white-space: nowrap;
+    }
+
+    .page-header h2 {
+        font-size: 40px;
+    }
+
+    .home-container,
+    .history-container,
+    .analytics-container,
+    .dashboard-container {
+        padding-top: 44px;
+    }
+
+    .modal-backdrop {
+        align-items: flex-end;
+
+        padding: 12px;
+    }
+
+    .modal {
+        max-height: calc(100vh - 24px);
+
+        padding: 22px;
+
+        border-radius: 20px;
+    }
+
+    .modal-header h3 {
+        font-size: 24px;
+    }
+
+    .modal-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .app-toast {
+        right: 16px;
+        bottom: 16px;
+        left: 16px;
+
+        max-width: none;
+    }
+
+    .donut-chart-wrapper {
+        width: 150px;
+        height: 150px;
+    }
+
+    .donut-center-label strong {
+        font-size: 15px;
+    }
+
+    .heatmap-cell-day {
+        font-size: 9px;
+    }
+
+    .heatmap-grid {
+        gap: 3px;
+    }
+
+    .heatmap-cell {
+        border-radius: 6px;
+    }
+}
