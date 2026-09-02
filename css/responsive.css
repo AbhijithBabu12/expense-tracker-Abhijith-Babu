@@ -48,13 +48,14 @@
     }
 
     .ai-chat-toolbar {
-    width: calc(100% - 24px);
-    padding: 10px 0 6px;
-}
-.ai-new-chat {
-    padding: 7px 12px;
-    font-size: 12px;
-}
+        width: calc(100% - 24px);
+        padding: 130px 0 6px;
+    }
+
+    .ai-new-chat {
+        padding: 7px 12px;
+        font-size: 12px;
+    }
 }
 
 @media (max-width: 800px) {
@@ -379,16 +380,6 @@
 }
 
 @media (max-width: 700px) {
-
-    .ai-header {
-        padding:
-            17px 18px;
-    }
-
-
-    .ai-header h1 {
-        font-size: 15px;
-    }
 
 
     .ai-new-chat {
