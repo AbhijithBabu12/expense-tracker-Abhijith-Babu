@@ -12,6 +12,26 @@ import {
 
 let transactionType = "expense";
 
+const categoryOptions = {
+    expense: [
+        "Food",
+        "Transport",
+        "Shopping",
+        "Bills",
+        "Entertainment",
+        "Health",
+        "Other"
+    ],
+    income: [
+        "Salary",
+        "Freelance",
+        "Business",
+        "Investment",
+        "Gift",
+        "Other"
+    ]
+};
+
 
 export function initializeHome() {
 
@@ -44,6 +64,7 @@ export function initializeHome() {
     timeInput.value =
         now.toTimeString().slice(0, 5);
 
+    renderCategoryOptions(categorySelect);
 
     // --------------------------------
     // Expense / Income toggle
@@ -61,6 +82,12 @@ export function initializeHome() {
 
             transactionType =
                 button.dataset.type;
+
+            renderCategoryOptions(categorySelect);
+            
+            customCategoryGroup.classList.add("hidden");
+            customCategoryInput.value = "";
+            customCategoryInput.required = false;
 
         });
 
@@ -217,9 +244,21 @@ export function initializeHome() {
 
         });
 
+        renderCategoryOptions(categorySelect);
 
         showNotification("Transaction added successfully.");
 
     });
 
+}
+
+function renderCategoryOptions(select) {
+    select.innerHTML = `
+        <option value="">Select category</option>
+        ${categoryOptions[transactionType]
+            .map(category => `
+                <option value="${category}">${category}</option>
+            `)
+            .join("")}
+    `;
 }
