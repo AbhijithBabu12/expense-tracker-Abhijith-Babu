@@ -6,6 +6,9 @@ import {
     validateTransaction
 } from "../core/validation.js";
 
+import {
+    showNotification
+} from "../components/notifications.js";
 
 let transactionType = "expense";
 
@@ -30,10 +33,16 @@ export function initializeHome() {
     const customCategoryInput =
         document.getElementById("custom-category");
 
+    const timeInput =
+        document.getElementById("time");
 
-    // Default date = today
+
+    // Default date = today, time = now
+    const now = new Date();
     dateInput.value =
-        new Date().toISOString().split("T")[0];
+        now.toISOString().split("T")[0];
+    timeInput.value =
+        now.toTimeString().slice(0, 5);
 
 
     // --------------------------------
@@ -108,9 +117,7 @@ export function initializeHome() {
 
             if (!customCategory) {
 
-                alert(
-                    "Please enter a custom category."
-                );
+                showNotification("Please enter a custom category.", "error");
 
                 customCategoryInput.focus();
 
@@ -134,6 +141,9 @@ export function initializeHome() {
             date:
                 formData.get("date"),
 
+            time:
+                formData.get("time"),
+
             description:
                 formData.get("description")
 
@@ -150,9 +160,9 @@ export function initializeHome() {
 
         if (!validation.valid) {
 
-            alert(
-                Object.values(validation.errors)
-                    .join("\n")
+            showNotification(
+                Object.values(validation.errors).join(" "),
+                "error"
             );
 
             return;
@@ -186,11 +196,12 @@ export function initializeHome() {
         customCategoryInput.value = "";
 
 
-        // Restore today's date
+        // Restore today's date and time
+        const resetTime = new Date();
         dateInput.value =
-            new Date()
-                .toISOString()
-                .split("T")[0];
+            resetTime.toISOString().split("T")[0];
+        timeInput.value =
+            resetTime.toTimeString().slice(0, 5);
 
 
         // Restore expense
@@ -207,7 +218,7 @@ export function initializeHome() {
         });
 
 
-        alert("Transaction added successfully.");
+        showNotification("Transaction added successfully.");
 
     });
 
