@@ -1,4 +1,7 @@
-# <img src="logo/giphy.gif" width="40" height="40" align="center" alt="Meowth Logo"> Meowth Smart Finance
+<div align="center">
+  <img src="Logo/giphy.gif"" alt="Blissey Logo" width="150" />
+
+   # Meowth Smart Finance
 
 ![Live Demo](https://img.shields.io/badge/Live_Demo-Available-success?style=for-the-badge)
 
