@@ -71,13 +71,12 @@ export function buildFinancialContext() {
         const itemizedTxs = monthTxs
             .slice()
             .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
-            .slice(0, 15)
+            .slice(0, 8)
             .map(t => ({
-                date: String(t.date || ""),
-                type: String(t.type || "expense"),
-                category: String(t.category || "General"),
-                amount: Number(t.amount) || 0,
-                description: String(t.description || t.category || "")
+                d: String(t.date || "").slice(5),
+                cat: String(t.category || "General"),
+                amt: Number(t.amount) || 0,
+                desc: String(t.description || t.category || "").slice(0, 30)
             }));
 
         const descriptionsList = [
@@ -86,7 +85,7 @@ export function buildFinancialContext() {
                     .map(t => String(t.description ?? "").trim())
                     .filter(Boolean)
             )
-        ].slice(0, 20);
+        ].slice(0, 10);
 
         return {
             month: ym,
@@ -95,19 +94,16 @@ export function buildFinancialContext() {
             expenses: summary.expenses,
             balance: summary.balance,
             savingsRate: Math.round(summary.savingsRate),
-            transactionCount: monthTxs.length,
-            categories: cats.map(c => ({
-                category: c.category,
-                amount: c.amount,
-                percentage: summary.expenses > 0
+            categories: cats.slice(0, 6).map(c => ({
+                cat: c.category,
+                amt: c.amount,
+                pct: summary.expenses > 0
                     ? Math.round((c.amount / summary.expenses) * 100)
                     : 0
             })),
-            topExpenses: topExps.map(e => ({
-                description: String(e.description || e.category || ""),
-                category: String(e.category || "General"),
-                amount: Number(e.amount) || 0,
-                date: String(e.date || "")
+            topExpenses: topExps.slice(0, 3).map(e => ({
+                desc: String(e.description || e.category || "").slice(0, 25),
+                amt: Number(e.amount) || 0
             })),
             descriptionsList,
             itemizedTransactions: itemizedTxs
@@ -139,10 +135,10 @@ export function buildFinancialContext() {
             expenses: allTimeSummary.expenses,
             balance: allTimeSummary.balance,
             savingsRate: Math.round(allTimeSummary.savingsRate),
-            categories: allTimeCategories.map(c => ({
-                category: c.category,
-                amount: c.amount,
-                percentage: allTimeSummary.expenses > 0
+            categories: allTimeCategories.slice(0, 6).map(c => ({
+                cat: c.category,
+                amt: c.amount,
+                pct: allTimeSummary.expenses > 0
                     ? Math.round((c.amount / allTimeSummary.expenses) * 100)
                     : 0
             })),
@@ -152,7 +148,7 @@ export function buildFinancialContext() {
                         .map(t => String(t.description ?? "").trim())
                         .filter(Boolean)
                 )
-            ].slice(0, 25)
+            ].slice(0, 15)
         },
 
         monthlyBreakdowns,

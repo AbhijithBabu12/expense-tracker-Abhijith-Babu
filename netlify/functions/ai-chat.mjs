@@ -117,14 +117,16 @@ ${JSON.stringify(financialContext)}
         const historyMessages =
             Array.isArray(chatHistory)
                 ? chatHistory
-                    .slice(-20)
+                    .slice(-4)
                     .map(msg => ({
                         role:
                             msg.role === "user"
                                 ? "user"
                                 : "assistant",
                         content:
-                            msg.content
+                            typeof msg.content === "string"
+                                ? msg.content.slice(0, 400)
+                                : ""
                     }))
                 : [];
 
@@ -139,26 +141,6 @@ ${JSON.stringify(financialContext)}
         ];
 
 
-        /*
-         * Pick the model and API key.
-         * GROQ_GPT is dedicated for openai/gpt-oss-20b.
-         * GROQ_API_KEY is for llama-3.3-70b-versatile.
-         */
-
-        /*
-         * Multi-model & Multi-key fallback:
-         * 1. If user chose GPT OSS 120B:
-         *    Candidate models: openai/gpt-oss-120b, openai/gpt-oss-20b
-         *    Candidate keys: GROQ_API_KEY, GROQ_GPT, AI_FLASH_CARD
-         *
-         * 2. If user chose GPT OSS 20B:
-         *    Candidate models: openai/gpt-oss-20b, openai/gpt-oss-120b
-         *    Candidate keys: GROQ_GPT, GROQ_API_KEY, AI_FLASH_CARD
-         *
-         * 3. If user chose Llama 3.3 70B:
-         *    Candidate models: llama-3.3-70b-versatile, openai/gpt-oss-120b, openai/gpt-oss-20b
-         *    Candidate keys: GROQ_API_KEY, GROQ_GPT, AI_FLASH_CARD
-         */
         let candidateModels = [];
         let candidateKeys = [];
 
@@ -184,10 +166,8 @@ ${JSON.stringify(financialContext)}
             ];
         } else {
             candidateModels = [
-                "llama-3.3-70b-versatile",
-                "openai/gpt-oss-120b",
                 "openai/gpt-oss-20b",
-                "llama-3.1-8b-instant"
+                "openai/gpt-oss-120b"
             ];
             candidateKeys = [
                 process.env.GROQ_API_KEY,
@@ -232,7 +212,7 @@ ${JSON.stringify(financialContext)}
                                 model,
                                 messages,
                                 temperature: 0.3,
-                                max_tokens: 1024,
+                                max_tokens: 500,
                                 stream: true
                             })
                         }
