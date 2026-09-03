@@ -2577,8 +2577,8 @@
 .ai-model-dropdown-menu {
     position: absolute;
     bottom: calc(100% + 10px);
-    right: 8px;
-    width: min(280px, calc(100% - 16px));
+    right: 0;
+    width: 260px;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: 16px;

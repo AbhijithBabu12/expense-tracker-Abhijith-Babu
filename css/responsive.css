@@ -498,8 +498,14 @@
     }
 
     .ai-model-dropdown-menu {
-        right: 4px;
-        width: min(260px, calc(100vw - 32px));
+        position: fixed;
+        bottom: 92px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        width: min(280px, calc(100vw - 32px));
+        animation: dropdownSlideUpCentered 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        z-index: 1500;
     }
 
     .ai-messages {

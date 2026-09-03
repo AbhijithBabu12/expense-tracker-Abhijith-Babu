@@ -1,14 +1,28 @@
 const GROQ_API_URL =
     "https://api.groq.com/openai/v1/chat/completions";
 
+const CORS_HEADERS = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type"
+};
+
 export default async (req) => {
+
+    if (req.method === "OPTIONS") {
+        return new Response(null, {
+            status: 204,
+            headers: CORS_HEADERS
+        });
+    }
 
     if (req.method !== "POST") {
         return new Response(
             JSON.stringify({ error: "Method not allowed" }),
             {
                 status: 405,
-                headers: { "Content-Type": "application/json" }
+                headers: CORS_HEADERS
             }
         );
     }
@@ -22,20 +36,24 @@ export default async (req) => {
             process.env.GROQ_GPT;
 
         if (!apiKey) {
+            console.error("[financial-status] No API key available in process.env");
             return new Response(
-                JSON.stringify({ error: "AI_FLASH_CARD API key not configured" }),
+                JSON.stringify({ error: "AI API key not configured on Netlify environment" }),
                 {
                     status: 500,
-                    headers: { "Content-Type": "application/json" }
+                    headers: CORS_HEADERS
                 }
             );
         }
 
         const body =
-            await req.json();
+            await req.json().catch(() => ({}));
 
         const financialContext =
             body.financialContext || {};
+
+        const refreshSeed =
+            body.refreshSeed || Date.now();
 
         const systemPrompt =
             `You are Meowth AI, a financial status analyzer. Review the verified financial context provided and output exactly two parts separated by a pipe character (|):
@@ -48,7 +66,7 @@ STRICT FORMATTING RULES:
 4. Output ONLY "HEADLINE | DETAIL" without quotation marks, bullet points, asterisks, or extra text.`;
 
         const userPrompt =
-            `Financial context: ${JSON.stringify(financialContext)}`;
+            `Financial context: ${JSON.stringify(financialContext)} [seed: ${refreshSeed}]`;
 
         const groqResponse =
             await fetch(GROQ_API_URL, {
@@ -63,7 +81,7 @@ STRICT FORMATTING RULES:
                         { role: "system", content: systemPrompt },
                         { role: "user", content: userPrompt }
                     ],
-                    temperature: 0.3,
+                    temperature: 0.75,
                     max_tokens: 600
                 })
             });
@@ -72,10 +90,10 @@ STRICT FORMATTING RULES:
             const errText = await groqResponse.text();
             console.error("Groq status error:", groqResponse.status, errText);
             return new Response(
-                JSON.stringify({ error: "Failed to generate AI status" }),
+                JSON.stringify({ error: "Failed to generate AI status", detail: errText }),
                 {
                     status: 502,
-                    headers: { "Content-Type": "application/json" }
+                    headers: CORS_HEADERS
                 }
             );
         }
@@ -105,7 +123,7 @@ STRICT FORMATTING RULES:
             }),
             {
                 status: 200,
-                headers: { "Content-Type": "application/json" }
+                headers: CORS_HEADERS
             }
         );
 
@@ -115,7 +133,7 @@ STRICT FORMATTING RULES:
             JSON.stringify({ error: err.message }),
             {
                 status: 500,
-                headers: { "Content-Type": "application/json" }
+                headers: CORS_HEADERS
             }
         );
     }

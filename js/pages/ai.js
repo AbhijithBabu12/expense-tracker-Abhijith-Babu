@@ -129,34 +129,6 @@ function renderAI() {
                         aria-label="Ask Meowth AI"
                     ></textarea>
 
-                    <div class="custom-dropdown-menu dropup ai-model-dropdown-menu hidden" id="ai-model-dropdown-menu" role="listbox">
-                        <div class="dropdown-header-tag">Select Model</div>
-
-                        <button
-                            type="button"
-                            class="custom-dropdown-item ai-model-opt ${selectedModel === "openai/gpt-oss-120b" ? "active" : ""}"
-                            data-model="openai/gpt-oss-120b"
-                        >
-                            <div class="model-opt-info">
-                                <span class="model-opt-name">GPT OSS 120B</span>
-                                <span class="model-opt-desc">Deep financial analysis & trends</span>
-                            </div>
-                            <span class="item-check">✓</span>
-                        </button>
-
-                        <button
-                            type="button"
-                            class="custom-dropdown-item ai-model-opt ${selectedModel === "openai/gpt-oss-20b" ? "active" : ""}"
-                            data-model="openai/gpt-oss-20b"
-                        >
-                            <div class="model-opt-info">
-                                <span class="model-opt-name">GPT OSS 20B</span>
-                                <span class="model-opt-desc">Fast, sharp & responsive insights</span>
-                            </div>
-                            <span class="item-check">✓</span>
-                        </button>
-                    </div>
-
                     <div class="ai-composer-actions">
                         <div class="ai-model-box" id="ai-model-box">
                             <button
@@ -175,6 +147,34 @@ function renderAI() {
                                     <polyline points="6 9 12 15 18 9"></polyline>
                                 </svg>
                             </button>
+
+                            <div class="custom-dropdown-menu dropup ai-model-dropdown-menu hidden" id="ai-model-dropdown-menu" role="listbox">
+                                <div class="dropdown-header-tag">Select Model</div>
+
+                                <button
+                                    type="button"
+                                    class="custom-dropdown-item ai-model-opt ${selectedModel === "openai/gpt-oss-120b" ? "active" : ""}"
+                                    data-model="openai/gpt-oss-120b"
+                                >
+                                    <div class="model-opt-info">
+                                        <span class="model-opt-name">GPT OSS 120B</span>
+                                        <span class="model-opt-desc">Deep financial analysis & trends</span>
+                                    </div>
+                                    <span class="item-check">✓</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="custom-dropdown-item ai-model-opt ${selectedModel === "openai/gpt-oss-20b" ? "active" : ""}"
+                                    data-model="openai/gpt-oss-20b"
+                                >
+                                    <div class="model-opt-info">
+                                        <span class="model-opt-name">GPT OSS 20B</span>
+                                        <span class="model-opt-desc">Fast, sharp & responsive insights</span>
+                                    </div>
+                                    <span class="item-check">✓</span>
+                                </button>
+                            </div>
                         </div>
 
                         <button

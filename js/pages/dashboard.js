@@ -450,20 +450,25 @@ async function requestAIStatus(forceRefresh = false) {
     const txHash =
         `${transactions.length}_${allTimeSummary.balance}_${allTimeSummary.expenses}_${allTimeSummary.income}`;
 
-    // If user clicked refresh, clear cached status and show analyzing state
+    const refreshBtn =
+        document.getElementById("refresh-ai-status-btn");
+
+    const headlineEl =
+        document.getElementById("dashboard-status-headline");
+
+    const detailEl =
+        document.getElementById("dashboard-status-detail");
+
+    const badgeLabel =
+        document.querySelector(".status-badge-label");
+
+    // If user clicked refresh button explicitly
     if (forceRefresh) {
         try {
             localStorage.removeItem(AI_STATUS_CACHE_KEY);
         } catch (e) {}
 
-        const headlineEl =
-            document.getElementById("dashboard-status-headline");
-
-        const detailEl =
-            document.getElementById("dashboard-status-detail");
-
-        const badgeLabel =
-            document.querySelector(".status-badge-label");
+        isFetchingAIStatus = false;
 
         if (badgeLabel) {
             badgeLabel.textContent = "Analyzing with AI...";
@@ -474,31 +479,33 @@ async function requestAIStatus(forceRefresh = false) {
         }
 
         if (detailEl) {
-            detailEl.textContent = "Meowth AI is evaluating your cash flow, top expenses, and savings rate...";
+            detailEl.textContent = "Meowth AI is generating a fresh evaluation of your cash flow...";
+        }
+
+        if (refreshBtn) {
+            refreshBtn.classList.add("loading");
         }
     } else {
-        // 1. Check local cache first if not explicitly forcing a refresh
+        // 1. Check local cache (fresh for up to 5 minutes for the identical transactions state)
         try {
             const cached = JSON.parse(localStorage.getItem(AI_STATUS_CACHE_KEY));
-            if (cached && cached.txHash === txHash && cached.headline && cached.detail) {
+            const isFresh = cached && cached.timestamp && (Date.now() - cached.timestamp < 5 * 60 * 1000);
+            if (cached && cached.txHash === txHash && cached.headline && cached.detail && isFresh) {
                 renderStatusCardContent(cached.headline, cached.detail, true);
                 return;
             }
         } catch (e) {}
 
-        // 2. Display dynamic local rule-based intelligence immediately
+        // 2. Display dynamic local rule-based intelligence immediately while waiting
         const fallback =
             getDynamicFinancialStatus(transactions, allTimeSummary, monthSummary);
 
         renderStatusCardContent(fallback.headline, fallback.detail, false);
     }
 
-    // 3. Request fresh AI assessment in background
+    // 3. Request fresh AI assessment
     if (isFetchingAIStatus) return;
     isFetchingAIStatus = true;
-
-    const refreshBtn =
-        document.getElementById("refresh-ai-status-btn");
 
     if (refreshBtn) {
         refreshBtn.classList.add("loading");
@@ -517,7 +524,8 @@ async function requestAIStatus(forceRefresh = false) {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        financialContext
+                        financialContext,
+                        refreshSeed: forceRefresh ? Date.now() : undefined
                     })
                 }
             );
@@ -543,7 +551,7 @@ async function requestAIStatus(forceRefresh = false) {
                 renderStatusCardContent(fallback.headline, fallback.detail, false);
             }
         } else {
-            console.warn("Financial status endpoint status:", response.status);
+            console.warn("Financial status endpoint returned non-200:", response.status);
             const fallback =
                 getDynamicFinancialStatus(transactions, allTimeSummary, monthSummary);
             renderStatusCardContent(fallback.headline, fallback.detail, false);
