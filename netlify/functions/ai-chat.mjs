@@ -4,7 +4,20 @@ const GROQ_API_URL =
 const MODEL =
     "llama-3.3-70b-versatile";
 
+const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
 export default async (req) => {
+
+    if (req.method === "OPTIONS") {
+        return new Response(null, {
+            status: 204,
+            headers: corsHeaders
+        });
+    }
 
     if (req.method !== "POST") {
         return new Response(
@@ -14,7 +27,8 @@ export default async (req) => {
             {
                 status: 405,
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    ...corsHeaders
                 }
             }
         );
@@ -276,7 +290,9 @@ ${JSON.stringify(
                         "no-cache",
 
                     "Connection":
-                        "keep-alive"
+                        "keep-alive",
+
+                    ...corsHeaders
                 }
             }
         );
@@ -292,15 +308,15 @@ ${JSON.stringify(
 
         return new Response(
             JSON.stringify({
-                error:
-                    "Something went wrong while processing your request"
+                error: error.message || "Something went wrong while processing your request"
             }),
             {
                 status: 500,
 
                 headers: {
                     "Content-Type":
-                        "application/json"
+                        "application/json",
+                    ...corsHeaders
                 }
             }
         );

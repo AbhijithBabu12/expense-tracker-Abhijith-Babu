@@ -41,8 +41,8 @@ export function buildFinancialContext() {
     // 2. Group transactions by month (YYYY-MM) across entire history
     const monthMap = new Map();
     for (const tx of transactions) {
-        const ym = (tx.date || "").slice(0, 7);
-        if (!ym) continue;
+        const ym = String(tx.date || "").slice(0, 7);
+        if (!ym || ym.length < 7) continue;
         if (!monthMap.has(ym)) {
             monthMap.set(ym, []);
         }
@@ -73,17 +73,17 @@ export function buildFinancialContext() {
             .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
             .slice(0, 50)
             .map(t => ({
-                date: t.date,
-                type: t.type,
-                category: t.category,
-                amount: Number(t.amount),
-                description: t.description || t.category
+                date: String(t.date || ""),
+                type: String(t.type || "expense"),
+                category: String(t.category || "General"),
+                amount: Number(t.amount) || 0,
+                description: String(t.description || t.category || "")
             }));
 
         const descriptionsList = [
             ...new Set(
                 monthTxs
-                    .map(t => t.description?.trim())
+                    .map(t => String(t.description ?? "").trim())
                     .filter(Boolean)
             )
         ];
@@ -104,10 +104,10 @@ export function buildFinancialContext() {
                     : 0
             })),
             topExpenses: topExps.map(e => ({
-                description: e.description || e.category,
-                category: e.category,
-                amount: Number(e.amount),
-                date: e.date
+                description: String(e.description || e.category || ""),
+                category: String(e.category || "General"),
+                amount: Number(e.amount) || 0,
+                date: String(e.date || "")
             })),
             descriptionsList,
             itemizedTransactions: itemizedTxs
@@ -133,11 +133,11 @@ export function buildFinancialContext() {
         .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
         .slice(0, 30)
         .map(t => ({
-            date: t.date,
-            type: t.type,
-            category: t.category,
-            amount: Number(t.amount),
-            description: t.description || ""
+            date: String(t.date || ""),
+            type: String(t.type || "expense"),
+            category: String(t.category || "General"),
+            amount: Number(t.amount) || 0,
+            description: String(t.description || "")
         }));
 
     return {
@@ -162,7 +162,7 @@ export function buildFinancialContext() {
             allDescriptions: [
                 ...new Set(
                     transactions
-                        .map(t => t.description?.trim())
+                        .map(t => String(t.description ?? "").trim())
                         .filter(Boolean)
                 )
             ]

@@ -612,9 +612,14 @@ async function handleSubmit(event) {
                 error
             );
 
+            const displayError =
+                error?.message && !error.message.includes("Failed to fetch")
+                    ? `Unable to complete request: ${error.message}`
+                    : "I couldn't connect to Meowth AI right now. Please try again.";
+
             updateAssistantMessage(
                 assistantMessage,
-                "I couldn't connect to Meowth AI right now. Please try again."
+                displayError
             );
 
         }
