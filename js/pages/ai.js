@@ -15,11 +15,17 @@ let chatHistory = [];
 
 const AI_MODEL_STORAGE_KEY = "meowth_selected_ai_model";
 let savedModel = localStorage.getItem(AI_MODEL_STORAGE_KEY);
-if (!savedModel || savedModel === "openai/gpt-oss-120b") {
+if (!savedModel) {
     savedModel = "llama-3.3-70b-versatile";
     localStorage.setItem(AI_MODEL_STORAGE_KEY, savedModel);
 }
 let selectedModel = savedModel;
+
+function getModelDisplayName(modelId) {
+    if (modelId === "openai/gpt-oss-120b") return "GPT OSS 120B";
+    if (modelId === "openai/gpt-oss-20b") return "GPT OSS 20B";
+    return "Llama 3.3 70B";
+}
 
 
 export function initializeAI() {
@@ -141,7 +147,7 @@ function renderAI() {
                             >
                                 <span class="model-sparkle">✦</span>
                                 <span id="ai-model-pill-label" class="model-pill-text">
-                                    ${selectedModel === "openai/gpt-oss-20b" ? "GPT OSS 20B" : "Llama 3.3 70B"}
+                                    ${getModelDisplayName(selectedModel)}
                                 </span>
                                 <svg class="model-caret-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="6 9 12 15 18 9"></polyline>
@@ -159,6 +165,18 @@ function renderAI() {
                                     <div class="model-opt-info">
                                         <span class="model-opt-name">Llama 3.3 70B</span>
                                         <span class="model-opt-desc">Deep financial analysis & trends</span>
+                                    </div>
+                                    <span class="item-check">✓</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="custom-dropdown-item ai-model-opt ${selectedModel === "openai/gpt-oss-120b" ? "active" : ""}"
+                                    data-model="openai/gpt-oss-120b"
+                                >
+                                    <div class="model-opt-info">
+                                        <span class="model-opt-name">GPT OSS 120B</span>
+                                        <span class="model-opt-desc">Heavy reasoning & complex logic</span>
                                     </div>
                                     <span class="item-check">✓</span>
                                 </button>
@@ -362,9 +380,7 @@ function setupAIEvents() {
 
                 if (modelLabel) {
                     modelLabel.textContent =
-                        model === "openai/gpt-oss-20b"
-                            ? "GPT OSS 20B"
-                            : "Llama 3.3 70B";
+                        getModelDisplayName(model);
                 }
 
                 modelDropdown.querySelectorAll(".ai-model-opt").forEach(o => {
