@@ -58,13 +58,13 @@ STRICT FORMATTING RULES:
                     "Authorization": `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: "llama-3.1-8b-instant",
+                    model: "openai/gpt-oss-20b",
                     messages: [
                         { role: "system", content: systemPrompt },
                         { role: "user", content: userPrompt }
                     ],
                     temperature: 0.3,
-                    max_tokens: 120
+                    max_tokens: 600
                 })
             });
 

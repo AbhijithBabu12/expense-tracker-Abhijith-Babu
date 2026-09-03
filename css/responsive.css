@@ -498,8 +498,8 @@
     }
 
     .ai-model-dropdown-menu {
-        right: -30px;
-        width: 240px;
+        right: 4px;
+        width: min(260px, calc(100vw - 32px));
     }
 
     .ai-messages {

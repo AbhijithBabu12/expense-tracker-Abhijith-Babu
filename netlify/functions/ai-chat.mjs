@@ -133,16 +133,16 @@ ${JSON.stringify(
          * GROQ_API_KEY is for llama-3.3-70b-versatile.
          */
 
-        const isGptModel =
+        const isGpt20b =
             requestedModel === "openai/gpt-oss-20b";
 
         const selectedModel =
-            isGptModel
+            isGpt20b
                 ? "openai/gpt-oss-20b"
-                : "llama-3.3-70b-versatile";
+                : "openai/gpt-oss-120b";
 
         const apiKey =
-            isGptModel
+            isGpt20b
                 ? (process.env.GROQ_GPT || process.env.GROQ_API_KEY)
                 : (process.env.GROQ_API_KEY || process.env.GROQ_GPT);
 

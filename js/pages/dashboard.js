@@ -450,11 +450,32 @@ async function requestAIStatus(forceRefresh = false) {
     const txHash =
         `${transactions.length}_${allTimeSummary.balance}_${allTimeSummary.expenses}_${allTimeSummary.income}`;
 
-    // If user clicked refresh, clear cached status to guarantee a fresh AI run
+    // If user clicked refresh, clear cached status and show analyzing state
     if (forceRefresh) {
         try {
             localStorage.removeItem(AI_STATUS_CACHE_KEY);
         } catch (e) {}
+
+        const headlineEl =
+            document.getElementById("dashboard-status-headline");
+
+        const detailEl =
+            document.getElementById("dashboard-status-detail");
+
+        const badgeLabel =
+            document.querySelector(".status-badge-label");
+
+        if (badgeLabel) {
+            badgeLabel.textContent = "Analyzing with AI...";
+        }
+
+        if (headlineEl) {
+            headlineEl.textContent = "Analyzing your latest financial activity...";
+        }
+
+        if (detailEl) {
+            detailEl.textContent = "Meowth AI is evaluating your cash flow, top expenses, and savings rate...";
+        }
     } else {
         // 1. Check local cache first if not explicitly forcing a refresh
         try {
@@ -464,13 +485,13 @@ async function requestAIStatus(forceRefresh = false) {
                 return;
             }
         } catch (e) {}
+
+        // 2. Display dynamic local rule-based intelligence immediately
+        const fallback =
+            getDynamicFinancialStatus(transactions, allTimeSummary, monthSummary);
+
+        renderStatusCardContent(fallback.headline, fallback.detail, false);
     }
-
-    // 2. Display dynamic local rule-based intelligence immediately
-    const fallback =
-        getDynamicFinancialStatus(transactions, allTimeSummary, monthSummary);
-
-    renderStatusCardContent(fallback.headline, fallback.detail, false);
 
     // 3. Request fresh AI assessment in background
     if (isFetchingAIStatus) return;
@@ -516,10 +537,22 @@ async function requestAIStatus(forceRefresh = false) {
 
                 localStorage.setItem(AI_STATUS_CACHE_KEY, JSON.stringify(cachePayload));
                 renderStatusCardContent(headline, detail || "", true);
+            } else {
+                const fallback =
+                    getDynamicFinancialStatus(transactions, allTimeSummary, monthSummary);
+                renderStatusCardContent(fallback.headline, fallback.detail, false);
             }
+        } else {
+            console.warn("Financial status endpoint status:", response.status);
+            const fallback =
+                getDynamicFinancialStatus(transactions, allTimeSummary, monthSummary);
+            renderStatusCardContent(fallback.headline, fallback.detail, false);
         }
     } catch (err) {
         console.warn("AI status request note: fallback dynamic status active.", err);
+        const fallback =
+            getDynamicFinancialStatus(transactions, allTimeSummary, monthSummary);
+        renderStatusCardContent(fallback.headline, fallback.detail, false);
     } finally {
         isFetchingAIStatus = false;
         if (refreshBtn) {
