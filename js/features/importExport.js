@@ -318,6 +318,7 @@ function exportPdf() {
         startY: 68,
         head: [[
             "Date",
+            "Time",
             "Type",
             "Category",
             "Description",
@@ -325,6 +326,7 @@ function exportPdf() {
         ]],
         body: rows.map(row => [
             row.Date,
+            row.Time,
             row.Type,
             row.Category,
             row.Description,
@@ -358,6 +360,7 @@ function createExportRows(transactions) {
         )
         .map(transaction => ({
             Date: transaction.date,
+            Time: transaction.time || "",
             Type: titleCase(transaction.type),
             Category: transaction.category,
             Description: transaction.description || "",
