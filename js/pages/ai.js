@@ -46,15 +46,6 @@ function renderAI() {
 
         <button
             type="button"
-            id="ai-mobile-back"
-            class="ai-mobile-back"
-            aria-label="Back to Home"
-        >
-            ← Back
-        </button>
-
-        <button
-            type="button"
             id="ai-new-chat"
             class="ai-new-chat"
         >
@@ -272,14 +263,6 @@ function setupAIEvents() {
             startNewConversation
         );
 
-    }
-
-    const mobileBack = document.getElementById("ai-mobile-back");
-    if (mobileBack) {
-        mobileBack.addEventListener("click", () => {
-            const homeLink = document.querySelector('.nav-link[data-page="home"]');
-            if (homeLink) homeLink.click();
-        });
     }
 
 

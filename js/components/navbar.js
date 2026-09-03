@@ -26,6 +26,7 @@ const pages = [
 export function renderNavbar() {
 
     const navbar = document.getElementById("navbar");
+    const initialPage = getSavedPage();
 
     navbar.innerHTML = `
         <nav class="navbar">
@@ -40,7 +41,7 @@ export function renderNavbar() {
                 ${pages.map(page => `
                     <button
                         type="button"
-                        class="nav-link ${page.id === "home" ? "active" : ""}"
+                        class="nav-link ${page.id === initialPage ? "active" : ""}"
                         data-page="${page.id}"
                     >
                         ${page.label}
@@ -55,21 +56,30 @@ export function renderNavbar() {
     setupNavigation();
     setupMobileAI();
 
-    const savedPage = getPageFromHash();
-    if (savedPage) {
-        navigateTo(savedPage, false);
-    }
+    // Set initial page cleanly without smooth-scroll jump
+    navigateTo(initialPage, false, false);
 
     window.addEventListener("hashchange", () => {
         const page = getPageFromHash();
         if (page) {
-            navigateTo(page, false);
+            navigateTo(page, false, true);
         }
     });
+
 }
 
 
 function setupNavigation() {
+
+    const navbar = document.getElementById("navbar");
+
+    const logo = navbar.querySelector(".logo");
+    if (logo) {
+        logo.addEventListener("click", event => {
+            event.preventDefault();
+            navigateTo("home");
+        });
+    }
 
     const navLinks =
         document.querySelectorAll(".nav-link");
@@ -85,6 +95,7 @@ function setupNavigation() {
         });
 
     });
+
 }
 
 function setupMobileAI() {
@@ -105,7 +116,7 @@ function setupMobileAI() {
 }
 
 
-export function navigateTo(pageName, updateHash = true) {
+export function navigateTo(pageName, updateHash = true, smoothScroll = true) {
 
     document
         .querySelectorAll(".page")
@@ -122,6 +133,10 @@ export function navigateTo(pageName, updateHash = true) {
 
     document.body.setAttribute("data-active-page", pageName);
 
+    try {
+        localStorage.setItem("meowth_active_page", pageName);
+    } catch (e) {}
+
     document
         .querySelectorAll(".nav-link")
         .forEach(link => {
@@ -137,10 +152,15 @@ export function navigateTo(pageName, updateHash = true) {
         window.location.hash = pageName;
     }
 
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
+    if (smoothScroll) {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    } else {
+        window.scrollTo(0, 0);
+    }
+
 }
 
 
@@ -157,5 +177,25 @@ function getPageFromHash() {
     }
 
     return null;
+
+}
+
+
+function getSavedPage() {
+
+    const fromHash = getPageFromHash();
+    if (fromHash) {
+        return fromHash;
+    }
+
+    try {
+        const fromStorage = localStorage.getItem("meowth_active_page");
+        const validPages = pages.map(page => page.id);
+        if (fromStorage && validPages.includes(fromStorage)) {
+            return fromStorage;
+        }
+    } catch (e) {}
+
+    return "home";
 
 }

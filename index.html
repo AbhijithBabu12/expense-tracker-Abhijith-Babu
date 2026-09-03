@@ -29,7 +29,7 @@
         <!-- Home page -->
         <section
           id="home-page"
-          class="page active"
+          class="page"
           aria-labelledby="home-title"
         >
           <div class="home-container">
@@ -344,6 +344,23 @@
         </section>
       </main>
     </div>
+
+    <!-- Synchronous early page activator to prevent home page flash on refresh -->
+    <script>
+      (function() {
+        try {
+          var hash = window.location.hash.replace('#', '').trim();
+          var valid = ['home', 'history', 'analytics', 'dashboard', 'ai'];
+          var page = (hash && valid.indexOf(hash) !== -1) ? hash : (localStorage.getItem('meowth_active_page') || 'home');
+          if (valid.indexOf(page) === -1) page = 'home';
+          var target = document.getElementById(page + '-page');
+          if (target) {
+            target.classList.add('active');
+            document.body.setAttribute('data-active-page', page);
+          }
+        } catch(e) {}
+      })();
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>

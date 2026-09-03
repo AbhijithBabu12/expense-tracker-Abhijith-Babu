@@ -46,11 +46,6 @@
     .import-section {
         flex-direction: column;
     }
-
-    .ai-new-chat {
-        padding: 7px 12px;
-        font-size: 12px;
-    }
 }
 
 @media (max-width: 800px) {
@@ -334,8 +329,13 @@
         padding: 0;
     }
 
+    .ai-new-chat {
+        top: 120px;
+        left: 20px;
+    }
+
     .ai-messages {
-        padding: 120px 20px 150px;
+        padding: 175px 20px 150px;
     }
 
     .ai-suggestion-grid {
@@ -358,7 +358,6 @@
 
 @media (max-width: 700px) {
 
-
     .nav-link[data-page="ai"] {
         display: none;
     }
@@ -367,64 +366,49 @@
         display: none;
     }
 
-
-    body[data-active-page="ai"] .ai-mobile-back {
-        display: block;
-        top: 20px;
-        left: 18px;
-    }
-
     .ai-new-chat {
-        top: 20px;
-        padding: 8px 10px;
+        top: 120px;
+        left: 18px;
+        padding: 7px 14px;
+        font-size: 12px;
     }
-
 
     .ai-messages {
         width: 100%;
-        padding: 70px 18px 150px;
+        padding: 175px 18px 150px;
         box-sizing: border-box;
     }
 
-
     .ai-empty-state {
         padding:
-            20px 0 60px;
+            16px 0 50px;
     }
-
 
     .ai-empty-state h2 {
-        font-size: 27px;
+        font-size: 26px;
     }
-
 
     .ai-empty-state > p {
         font-size: 14px;
     }
 
-
     .ai-suggestion-grid {
         grid-template-columns: 1fr;
-
         margin-top: 25px;
     }
-
 
     .ai-suggestion {
         min-height: 82px;
     }
 
-
     .ai-message-bubble {
         max-width: 85%;
     }
-
 
     .ai-message-content {
         max-width: 100%;
         min-width: 0;
     }
-
 
     .ai-composer-wrapper {
         width:
@@ -434,15 +418,49 @@
             10px;
     }
 
-
     .ai-composer {
         border-radius:
             17px;
     }
 
-
     .ai-disclaimer {
         font-size: 9px;
+    }
+
+}
+
+@media (max-width: 520px) {
+
+    .ai-new-chat {
+        top: 138px;
+        left: 16px;
+        padding: 7px 14px;
+        font-size: 12px;
+    }
+
+    .ai-messages {
+        padding: 188px 16px 140px;
+    }
+
+    .ai-empty-state {
+        padding: 8px 0 30px;
+    }
+
+    .ai-empty-mark {
+        width: 44px;
+        height: 44px;
+        font-size: 18px;
+        margin-bottom: 14px;
+    }
+
+    .ai-empty-state h2 {
+        font-size: 23px;
+        margin-bottom: 8px;
+    }
+
+    .ai-empty-state > p {
+        font-size: 13px;
+        line-height: 1.4;
     }
 
 }

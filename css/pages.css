@@ -1550,51 +1550,45 @@
     position: relative;
 }
 
-.ai-mobile-back {
-    display: none;
-    appearance: none;
-    border: none;
-    background: transparent;
-    color: var(--color-text-secondary);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 8px 0;
-
-    position: fixed;
-    top: 100px;
-    left: 24px;
-    z-index: 60;
-}
-
 .ai-new-chat {
     appearance: none;
-    border: 1px solid var(--color-border);
-    background: var(--color-surface);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     color: var(--color-text-secondary);
 
-    padding: 8px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 8px 16px;
     border-radius: 999px;
 
     font-size: 13px;
     font-weight: 500;
 
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: all var(--transition-fast);
 
     position: fixed;
-    top: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 60;
+    top: 126px;
+    left: max(24px, calc(50% - 450px));
+    z-index: 80;
 
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .ai-new-chat:hover {
     color: var(--color-text-primary);
-    border-color: var(--color-border-focus);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(0, 0, 0, 0.16);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.ai-new-chat:active {
+    transform: translateY(0);
 }
 
 /* =========================================================
@@ -1611,7 +1605,7 @@
     overflow-y: auto;
     scroll-behavior: auto;
 
-    padding: 130px 0 140px;
+    padding: 175px 0 140px;
 }
 
 
@@ -1639,12 +1633,12 @@
     flex-direction: column;
 
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
 
     text-align: center;
 
     padding:
-        30px 0 80px;
+        20px 0 60px;
 }
 
 
