@@ -94,6 +94,7 @@ export function buildFinancialContext() {
             expenses: summary.expenses,
             balance: summary.balance,
             savingsRate: Math.round(summary.savingsRate),
+            transactionCount: monthTxs.length,
             categories: cats.slice(0, 6).map(c => ({
                 cat: c.category,
                 amt: c.amount,
@@ -193,7 +194,16 @@ export function buildFinancialContext() {
 
         topCategories: currentMonthObj.categories || [],
 
-        recentTransactions: recentSample,
+        recentTransactions: transactions
+            .slice()
+            .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
+            .slice(0, 8)
+            .map(t => ({
+                d: String(t.date || "").slice(5),
+                cat: String(t.category || "General"),
+                amt: Number(t.amount) || 0,
+                desc: String(t.description || "").slice(0, 25)
+            })),
 
         transactionCount: {
             total: transactions.length,
