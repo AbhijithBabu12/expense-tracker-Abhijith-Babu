@@ -86,6 +86,15 @@ export function deleteTransaction(id) {
 }
 
 
+export function deleteAllTransactions() {
+
+    saveTransactions([]);
+
+    dispatchTransactionsChanged();
+
+}
+
+
 export function updateTransaction(id, updates) {
 
     const transactions = getTransactions();

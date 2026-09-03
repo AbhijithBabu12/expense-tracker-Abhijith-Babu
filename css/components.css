@@ -593,3 +593,39 @@ body:has(.modal-backdrop:not(.hidden)) .mobile-ai-button {
 .custom-dropdown-item.active .item-check {
     opacity: 1;
 }
+
+/* Danger Action Button (Clear All) */
+.danger-button-subtle {
+    color: #e53935;
+    border-color: rgba(229, 57, 53, 0.28);
+    background: rgba(229, 57, 53, 0.04);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all var(--transition-fast);
+}
+
+.danger-button-subtle:hover:not(:disabled) {
+    background: rgba(229, 57, 53, 0.12);
+    border-color: rgba(229, 57, 53, 0.6);
+    color: #d32f2f;
+    transform: translateY(-1px);
+}
+
+.danger-button-subtle:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.danger-button-subtle:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    border-color: var(--color-border);
+    color: var(--color-text-muted);
+    background: transparent;
+    pointer-events: none;
+}
+
+.danger-eyebrow {
+    color: #e53935 !important;
+}

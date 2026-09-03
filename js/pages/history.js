@@ -1,7 +1,8 @@
 import {
     getTransactions,
     updateTransaction,
-    deleteTransaction
+    deleteTransaction,
+    deleteAllTransactions
 } from "../data/transactions.js";
 
 import {
@@ -59,10 +60,12 @@ export function initializeHistory() {
 
     createEditModal();
     createDeleteModal();
+    createClearAllModal();
     createFilterModal();
     setupSearch();
     setupTypeFilters();
     setupFilterButton();
+    setupClearAllButton();
 
     window.addEventListener(
         "transactionsChanged",
@@ -1073,6 +1076,16 @@ export function renderHistory() {
     const transactions =
         getFilteredTransactions();
 
+    const allStoredTransactions =
+        getTransactions();
+
+    const clearBtn =
+        document.getElementById("clear-all-transactions-button");
+
+    if (clearBtn) {
+        clearBtn.disabled = allStoredTransactions.length === 0;
+    }
+
     count.textContent =
         transactions.length;
 
@@ -1932,6 +1945,168 @@ function confirmDelete() {
     renderHistory();
 
     showNotification("Transaction deleted.");
+
+}
+
+
+function createClearAllModal() {
+
+    if (document.getElementById("clear-all-modal")) {
+        return;
+    }
+
+    const modal =
+        document.createElement("div");
+
+    modal.id = "clear-all-modal";
+    modal.className = "modal-backdrop hidden";
+
+    modal.innerHTML = `
+        <div
+            class="modal small-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="clear-all-modal-title"
+        >
+            <div class="modal-header">
+                <div>
+                    <p class="eyebrow danger-eyebrow">DANGER ZONE</p>
+                    <h3 id="clear-all-modal-title">Delete all transactions?</h3>
+                </div>
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    data-clear-all-close
+                    aria-label="Close modal"
+                >
+                    x
+                </button>
+            </div>
+
+            <p class="modal-copy">
+                Are you sure you want to delete all <strong><span id="clear-all-count">0</span> transactions</strong>? This will permanently wipe your transaction history and reset your analytics and dashboard. This action cannot be undone.
+            </p>
+
+            <div class="modal-actions">
+                <button
+                    type="button"
+                    class="secondary-button"
+                    data-clear-all-close
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    class="danger-button"
+                    id="confirm-clear-all-button"
+                >
+                    Yes, delete everything
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    setupClearAllModalEvents();
+
+}
+
+
+function setupClearAllModalEvents() {
+
+    const modal =
+        document.getElementById("clear-all-modal");
+
+    if (!modal) return;
+
+    modal.addEventListener("click", event => {
+
+        if (
+            event.target === modal ||
+            event.target.hasAttribute("data-clear-all-close")
+        ) {
+            closeClearAllModal();
+        }
+
+    });
+
+    const confirmBtn =
+        document.getElementById("confirm-clear-all-button");
+
+    if (confirmBtn) {
+        confirmBtn.addEventListener("click", confirmClearAll);
+    }
+
+}
+
+
+function openClearAllModal(count) {
+
+    const countEl =
+        document.getElementById("clear-all-count");
+
+    if (countEl) {
+        countEl.textContent = count;
+    }
+
+    const modal =
+        document.getElementById("clear-all-modal");
+
+    if (modal) {
+        modal.classList.remove("hidden");
+        const confirmBtn = document.getElementById("confirm-clear-all-button");
+        if (confirmBtn) confirmBtn.focus();
+    }
+
+}
+
+
+function closeClearAllModal() {
+
+    const modal =
+        document.getElementById("clear-all-modal");
+
+    if (modal) {
+        modal.classList.add("hidden");
+    }
+
+}
+
+
+function confirmClearAll() {
+
+    deleteAllTransactions();
+
+    try {
+        localStorage.removeItem("meowth_ai_status_cache");
+    } catch (e) {}
+
+    closeClearAllModal();
+    renderHistory();
+
+    showNotification("All transactions cleared successfully.", "info");
+
+}
+
+
+function setupClearAllButton() {
+
+    const clearBtn =
+        document.getElementById("clear-all-transactions-button");
+
+    if (clearBtn) {
+        clearBtn.addEventListener("click", () => {
+            const allTransactions = getTransactions();
+            if (allTransactions.length === 0) {
+                showNotification("No transactions to delete.", "info");
+                return;
+            }
+            openClearAllModal(allTransactions.length);
+        });
+    }
 
 }
 
