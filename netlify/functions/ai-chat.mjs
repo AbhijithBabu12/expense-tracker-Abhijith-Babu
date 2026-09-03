@@ -136,16 +136,20 @@ ${JSON.stringify(
         const isGpt20b =
             requestedModel === "openai/gpt-oss-20b";
 
-        const selectedModel =
-            isGpt20b
-                ? "openai/gpt-oss-20b"
-                : "openai/gpt-oss-120b";
-
         /*
-         * Multi-key fallback:
-         * Prioritize the dedicated key, but gracefully fall back across all 3 configured keys:
-         * GROQ_API_KEY, GROQ_GPT, and AI_FLASH_CARD.
+         * Multi-model & Multi-key fallback:
+         * 1. If user chose GPT OSS 20B:
+         *    Candidate models: openai/gpt-oss-20b, openai/gpt-oss-120b
+         *    Candidate keys: GROQ_GPT, GROQ_API_KEY, AI_FLASH_CARD
+         *
+         * 2. If user chose Llama 3.3 70B:
+         *    Candidate models: llama-3.3-70b-versatile, openai/gpt-oss-120b, openai/gpt-oss-20b
+         *    Candidate keys: GROQ_API_KEY, GROQ_GPT, AI_FLASH_CARD
          */
+        const candidateModels = isGpt20b
+            ? ["openai/gpt-oss-20b", "openai/gpt-oss-120b"]
+            : ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "openai/gpt-oss-20b"];
+
         const candidateKeys = isGpt20b
             ? [process.env.GROQ_GPT, process.env.GROQ_API_KEY, process.env.AI_FLASH_CARD]
             : [process.env.GROQ_API_KEY, process.env.GROQ_GPT, process.env.AI_FLASH_CARD];
@@ -170,40 +174,43 @@ ${JSON.stringify(
         let groqResponse = null;
         let lastErrorText = "";
 
-        for (const apiKey of apiKeys) {
-            try {
-                const res = await fetch(
-                    "https://api.groq.com/openai/v1/chat/completions",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${apiKey}`
-                        },
-                        body: JSON.stringify({
-                            model: selectedModel,
-                            messages,
-                            temperature: 0.3,
-                            stream: true
-                        })
+        modelLoop:
+        for (const model of candidateModels) {
+            for (const apiKey of apiKeys) {
+                try {
+                    const res = await fetch(
+                        "https://api.groq.com/openai/v1/chat/completions",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${apiKey}`
+                            },
+                            body: JSON.stringify({
+                                model,
+                                messages,
+                                temperature: 0.3,
+                                stream: true
+                            })
+                        }
+                    );
+
+                    if (res.ok) {
+                        groqResponse = res;
+                        break modelLoop;
                     }
-                );
 
-                if (res.ok) {
-                    groqResponse = res;
-                    break;
+                    lastErrorText = await res.text();
+                    console.warn(`[ai-chat] Model ${model} returned ${res.status}, checking fallback:`, lastErrorText);
+                } catch (networkErr) {
+                    console.warn("[ai-chat] Network error on key, checking fallback:", networkErr);
+                    lastErrorText = networkErr.message;
                 }
-
-                lastErrorText = await res.text();
-                console.warn(`[ai-chat] Key returned ${res.status}, falling back to next available key:`, lastErrorText);
-            } catch (networkErr) {
-                console.warn("[ai-chat] Network error on key, falling back to next key:", networkErr);
-                lastErrorText = networkErr.message;
             }
         }
 
         if (!groqResponse) {
-            console.error("[ai-chat] All candidate API keys failed:", lastErrorText);
+            console.error("[ai-chat] All candidate models and API keys failed:", lastErrorText);
             return new Response(
                 JSON.stringify({
                     error: "All AI service keys are currently unavailable or rate-limited. Please try again shortly."
