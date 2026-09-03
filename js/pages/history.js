@@ -1151,6 +1151,10 @@ function createTransactionHTML(transaction) {
             ? "+"
             : "-";
 
+    const icon =
+        categoryIcons[transaction.category] ||
+        categoryIcons.Other;
+
     const dayName =
         getDayName(transaction.date);
 
