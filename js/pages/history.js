@@ -72,6 +72,7 @@ function setupSearch() {
                 .trim()
                 .toLowerCase();
 
+        visibleCount = INITIAL_LIMIT;
         renderHistory();
 
     });
@@ -97,6 +98,7 @@ function setupTypeFilters() {
             currentTypeFilter =
                 button.dataset.filterType;
 
+            visibleCount = INITIAL_LIMIT;
             renderHistory();
 
         });
@@ -118,6 +120,7 @@ function setupCategoryFilter() {
         currentCategoryFilter =
             event.target.value;
 
+        visibleCount = INITIAL_LIMIT;
         renderHistory();
 
     });
@@ -162,6 +165,11 @@ function renderCategoryFilterOptions() {
 }
 
 
+const INITIAL_LIMIT = 10;
+const BATCH_SIZE = 10;
+let visibleCount = INITIAL_LIMIT;
+
+
 function getFilteredTransactions() {
 
     return getTransactions()
@@ -179,24 +187,149 @@ function getFilteredTransactions() {
                 return true;
             }
 
-            const searchableText = [
-                transaction.category,
-                transaction.description,
-                transaction.date,
-                transaction.time,
-                transaction.type,
-                transaction.amount
-            ]
-                .join(" ")
-                .toLowerCase();
+            // Numeric price comparisons (e.g. > 500, <= 1000)
+            const operatorMatch =
+                currentSearch.match(/^([><]=?)\s*(\d+(?:\.\d+)?)$/);
 
-            return searchableText.includes(currentSearch);
+            if (operatorMatch) {
+                const op = operatorMatch[1];
+                const targetVal = parseFloat(operatorMatch[2]);
+                const txAmount = parseFloat(transaction.amount);
+
+                if (!Number.isNaN(txAmount) && !Number.isNaN(targetVal)) {
+                    if (op === ">") return txAmount > targetVal;
+                    if (op === ">=") return txAmount >= targetVal;
+                    if (op === "<") return txAmount < targetVal;
+                    if (op === "<=") return txAmount <= targetVal;
+                }
+            }
+
+            const searchableText =
+                getSearchableTransactionText(transaction);
+
+            const searchWords =
+                currentSearch.split(/\s+/).filter(Boolean);
+
+            return searchWords.every(word => {
+                const cleanWord =
+                    word.replace(/^[₹$]|^(?:rs\.?)\s*/i, "").replaceAll(",", "");
+
+                return searchableText.includes(word) ||
+                    (cleanWord && searchableText.includes(cleanWord));
+            });
 
         })
         .sort((a, b) =>
             getTransactionDateTime(b) -
             getTransactionDateTime(a)
         );
+
+}
+
+
+function getSearchableTransactionText(transaction) {
+
+    const tokens = [
+        transaction.category,
+        transaction.description,
+        transaction.type
+    ];
+
+    // Price variations
+    const numAmount = Number(transaction.amount);
+    if (!Number.isNaN(numAmount)) {
+        tokens.push(
+            String(transaction.amount),
+            numAmount.toString(),
+            numAmount.toFixed(2),
+            numAmount.toLocaleString("en-IN"),
+            numAmount.toLocaleString("en-IN", { minimumFractionDigits: 2 }),
+            `₹${numAmount}`,
+            `₹${numAmount.toLocaleString("en-IN")}`,
+            `rs ${numAmount}`,
+            `rs. ${numAmount}`
+        );
+    }
+
+    // Date variations (formats, month names, days)
+    if (transaction.date) {
+        tokens.push(transaction.date); // e.g. "2026-09-03"
+
+        try {
+            const dateObj = new Date(`${transaction.date}T00:00:00`);
+
+            if (!Number.isNaN(dateObj.getTime())) {
+                const dayNum = dateObj.getDate();
+                const dayPadded = String(dayNum).padStart(2, "0");
+                const monthNum = dateObj.getMonth() + 1;
+                const monthPadded = String(monthNum).padStart(2, "0");
+                const year = dateObj.getFullYear();
+
+                const fullMonth = dateObj.toLocaleDateString("en-IN", { month: "long" });
+                const shortMonth = dateObj.toLocaleDateString("en-IN", { month: "short" });
+                const fullDay = dateObj.toLocaleDateString("en-IN", { weekday: "long" });
+                const shortDay = dateObj.toLocaleDateString("en-IN", { weekday: "short" });
+
+                tokens.push(
+                    formatDate(transaction.date),
+                    `${dayNum} ${shortMonth}`,
+                    `${dayPadded} ${shortMonth}`,
+                    `${dayNum} ${fullMonth}`,
+                    `${dayPadded} ${fullMonth}`,
+                    `${dayNum} ${shortMonth} ${year}`,
+                    `${dayPadded} ${shortMonth} ${year}`,
+                    `${dayNum} ${fullMonth} ${year}`,
+                    `${dayPadded} ${fullMonth} ${year}`,
+                    fullMonth,
+                    shortMonth,
+                    fullDay,
+                    shortDay,
+                    `${dayNum}/${monthNum}/${year}`,
+                    `${dayPadded}/${monthPadded}/${year}`,
+                    `${dayNum}/${monthNum}`,
+                    `${dayPadded}/${monthPadded}`,
+                    `${dayNum}-${monthNum}-${year}`,
+                    `${dayPadded}-${monthPadded}-${year}`
+                );
+            }
+        } catch (e) {}
+    }
+
+    // Time variations (12h, 24h, AM/PM)
+    if (transaction.time) {
+        tokens.push(transaction.time); // e.g. "14:30"
+
+        try {
+            const formatted = formatTime(transaction.time);
+            tokens.push(
+                formatted,
+                formatted.replace(/\s+/g, ""),
+                formatted.replace(/\s*(am|pm)/i, "")
+            );
+
+            const [h, m] = String(transaction.time).split(":");
+            const hours = Number(h);
+            const mins = Number(m);
+
+            if (!Number.isNaN(hours) && !Number.isNaN(mins)) {
+                const hour12 = hours % 12 || 12;
+                const paddedHour12 = String(hour12).padStart(2, "0");
+                const paddedMins = String(mins).padStart(2, "0");
+                const ampm = hours >= 12 ? "pm" : "am";
+
+                tokens.push(
+                    `${hour12}:${paddedMins}`,
+                    `${hour12}:${paddedMins} ${ampm}`,
+                    `${hour12}:${paddedMins}${ampm}`,
+                    `${paddedHour12}:${paddedMins} ${ampm}`,
+                    `${paddedHour12}:${paddedMins}${ampm}`,
+                    ampm
+                );
+            }
+        } catch (e) {}
+    }
+
+    return tokens.filter(Boolean).join(" ").toLowerCase();
 
 }
 
@@ -220,10 +353,23 @@ export function renderHistory() {
     count.textContent =
         transactions.length;
 
+    let loadMoreWrapper =
+        document.getElementById("history-load-more-wrapper");
+
+    if (!loadMoreWrapper && list) {
+        loadMoreWrapper = document.createElement("div");
+        loadMoreWrapper.id = "history-load-more-wrapper";
+        loadMoreWrapper.className = "history-load-more-wrapper";
+        list.insertAdjacentElement("afterend", loadMoreWrapper);
+    }
+
     if (transactions.length === 0) {
 
         list.innerHTML = "";
         emptyState.classList.remove("hidden");
+        if (loadMoreWrapper) {
+            loadMoreWrapper.innerHTML = "";
+        }
 
         return;
 
@@ -231,12 +377,43 @@ export function renderHistory() {
 
     emptyState.classList.add("hidden");
 
+    const visibleTransactions =
+        transactions.slice(0, visibleCount);
+
     list.innerHTML =
-        transactions
+        visibleTransactions
             .map(createTransactionHTML)
             .join("");
 
     setupTransactionActions();
+
+    const remaining = transactions.length - visibleCount;
+
+    if (loadMoreWrapper) {
+        if (remaining > 0) {
+            const nextBatch = Math.min(BATCH_SIZE, remaining);
+            loadMoreWrapper.innerHTML = `
+                <button
+                    type="button"
+                    id="history-load-more"
+                    class="secondary-button history-load-more-button"
+                >
+                    See more (+${nextBatch})
+                    <span class="load-more-remaining">${remaining} more</span>
+                </button>
+            `;
+
+            const loadMoreBtn = document.getElementById("history-load-more");
+            if (loadMoreBtn) {
+                loadMoreBtn.addEventListener("click", () => {
+                    visibleCount += BATCH_SIZE;
+                    renderHistory();
+                });
+            }
+        } else {
+            loadMoreWrapper.innerHTML = "";
+        }
+    }
 
 }
 
