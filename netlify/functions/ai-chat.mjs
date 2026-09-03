@@ -141,15 +141,22 @@ ${JSON.stringify(
                 ? "openai/gpt-oss-20b"
                 : "openai/gpt-oss-120b";
 
-        const apiKey =
-            isGpt20b
-                ? (process.env.GROQ_GPT || process.env.GROQ_API_KEY)
-                : (process.env.GROQ_API_KEY || process.env.GROQ_GPT);
+        /*
+         * Multi-key fallback:
+         * Prioritize the dedicated key, but gracefully fall back across all 3 configured keys:
+         * GROQ_API_KEY, GROQ_GPT, and AI_FLASH_CARD.
+         */
+        const candidateKeys = isGpt20b
+            ? [process.env.GROQ_GPT, process.env.GROQ_API_KEY, process.env.AI_FLASH_CARD]
+            : [process.env.GROQ_API_KEY, process.env.GROQ_GPT, process.env.AI_FLASH_CARD];
 
-        if (!apiKey) {
+        const apiKeys =
+            [...new Set(candidateKeys.filter(Boolean))];
+
+        if (apiKeys.length === 0) {
             return new Response(
                 JSON.stringify({
-                    error: "API key is not configured for the selected model."
+                    error: "No Groq API keys are configured on the server."
                 }),
                 {
                     status: 500,
@@ -160,65 +167,54 @@ ${JSON.stringify(
             );
         }
 
-        const groqResponse =
-            await fetch(
-                "https://api.groq.com/openai/v1/chat/completions",
-                {
-                    method: "POST",
+        let groqResponse = null;
+        let lastErrorText = "";
 
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization":
-                            `Bearer ${apiKey}`
-                    },
+        for (const apiKey of apiKeys) {
+            try {
+                const res = await fetch(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: selectedModel,
+                            messages,
+                            temperature: 0.3,
+                            stream: true
+                        })
+                    }
+                );
 
-                    body: JSON.stringify({
-
-                        model: selectedModel,
-
-                        messages,
-
-                        temperature: 0.3,
-
-                        stream: true
-
-                    })
-
+                if (res.ok) {
+                    groqResponse = res;
+                    break;
                 }
-            );
 
+                lastErrorText = await res.text();
+                console.warn(`[ai-chat] Key returned ${res.status}, falling back to next available key:`, lastErrorText);
+            } catch (networkErr) {
+                console.warn("[ai-chat] Network error on key, falling back to next key:", networkErr);
+                lastErrorText = networkErr.message;
+            }
+        }
 
-        /*
-         * Handle Groq errors before attempting
-         * to read the streaming body.
-         */
-
-        if (!groqResponse.ok) {
-
-            const errorText =
-                await groqResponse.text();
-
-            console.error(
-                "Groq API error:",
-                groqResponse.status,
-                errorText
-            );
-
-
+        if (!groqResponse) {
+            console.error("[ai-chat] All candidate API keys failed:", lastErrorText);
             return new Response(
                 JSON.stringify({
-                    error:
-                        "AI service request failed"
+                    error: "All AI service keys are currently unavailable or rate-limited. Please try again shortly."
                 }),
                 {
-                    status: 500,
+                    status: 502,
                     headers: {
-                        "Content-Type":
-                            "application/json"
+                        "Content-Type": "application/json"
                     }
                 }
             );
-
         }
 
 
