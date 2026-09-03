@@ -1337,6 +1337,99 @@
     font-size: 15px;
 }
 
+/* Dashboard AI Status Card */
+
+.dashboard-status-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.status-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: rgba(0, 0, 0, 0.035);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.status-sparkle {
+    color: var(--color-text-primary);
+    font-size: 12px;
+}
+
+.status-refresh-btn {
+    appearance: none;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.status-refresh-btn:hover {
+    background: var(--color-background);
+    color: var(--color-text-primary);
+    border-color: var(--color-border-focus);
+}
+
+.status-refresh-btn.loading svg {
+    animation: status-spin 0.8s linear infinite;
+}
+
+@keyframes status-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.status-card-footer {
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.status-ask-ai-link {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--color-text-primary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform var(--transition-fast);
+}
+
+.status-ask-ai-link:hover {
+    text-decoration: underline;
+    transform: translateX(2px);
+}
+
 .dashboard-balance {
     display: flex;
     flex-direction: column;

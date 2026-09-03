@@ -3,10 +3,23 @@ import {
 } from "../data/transactions.js";
 
 import {
+    getCategoryBreakdown,
     getFinancialSummary,
     getTopExpenses,
     getTransactionsByPeriod
 } from "../core/calculations.js";
+
+import {
+    buildFinancialContext
+} from "../ai/contextBuilder.js";
+
+import {
+    navigateTo
+} from "../components/navbar.js";
+
+
+const AI_STATUS_CACHE_KEY = "meowth_ai_status_cache";
+let isFetchingAIStatus = false;
 
 
 export function initializeDashboard() {
@@ -58,15 +71,41 @@ function renderDashboard() {
 
     }
 
+    const fallbackStatus =
+        getDynamicFinancialStatus(transactions, allTimeSummary, monthSummary);
+
     container.innerHTML = `
         <section class="dashboard-hero">
-            <div>
-                <p class="panel-label">Financial status</p>
-                <h3>${getDashboardMessage(allTimeSummary)}</h3>
-                <p>
-                    You have recorded ${transactions.length}
-                    ${transactions.length === 1 ? "transaction" : "transactions"}.
-                </p>
+            <div class="dashboard-status-card">
+                <div class="status-card-header">
+                    <span class="status-badge" id="dashboard-status-badge">
+                        <span class="status-sparkle">✦</span>
+                        <span class="status-badge-label">AI Financial Status</span>
+                    </span>
+
+                    <button
+                        type="button"
+                        id="refresh-ai-status-btn"
+                        class="status-refresh-btn"
+                        title="Generate fresh AI insight"
+                        aria-label="Refresh AI Financial Insight"
+                    >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                        </svg>
+                        <span>Refresh</span>
+                    </button>
+                </div>
+
+                <h3 id="dashboard-status-headline">${escapeHTML(fallbackStatus.headline)}</h3>
+
+                <p id="dashboard-status-detail">${escapeHTML(fallbackStatus.detail)}</p>
+
+                <div class="status-card-footer">
+                    <button type="button" id="status-ask-ai-btn" class="status-ask-ai-link">
+                        Ask Meowth for advice →
+                    </button>
+                </div>
             </div>
 
             <div class="dashboard-balance">
@@ -145,6 +184,9 @@ function renderDashboard() {
             </section>
         </div>
     `;
+
+    setupDashboardEvents();
+    requestAIStatus(false);
 
 }
 
@@ -244,25 +286,209 @@ function createEmptyDashboard() {
 }
 
 
-function getDashboardMessage(summary) {
+function setupDashboardEvents() {
 
-    if (summary.income === 0) {
-        return "Add income to start tracking your money.";
+    const refreshBtn =
+        document.getElementById("refresh-ai-status-btn");
+
+    if (refreshBtn) {
+        refreshBtn.addEventListener("click", () => {
+            requestAIStatus(true);
+        });
     }
 
-    if (summary.balance < 0) {
-        return "Your expenses are higher than your income.";
+    const askAiBtn =
+        document.getElementById("status-ask-ai-btn");
+
+    if (askAiBtn) {
+        askAiBtn.addEventListener("click", () => {
+            navigateTo("ai");
+            setTimeout(() => {
+                const aiInput = document.getElementById("ai-input");
+                if (aiInput) {
+                    aiInput.value = "Based on my current financial status, what are your top recommendations for me?";
+                    aiInput.focus();
+                }
+            }, 120);
+        });
     }
 
-    if (summary.savingsRate >= 30) {
-        return "You are saving a strong share of your income.";
+}
+
+
+function renderStatusCardContent(headline, detail, isAiGenerated = false) {
+
+    const headlineEl =
+        document.getElementById("dashboard-status-headline");
+
+    const detailEl =
+        document.getElementById("dashboard-status-detail");
+
+    const badgeLabel =
+        document.querySelector(".status-badge-label");
+
+    if (headlineEl) {
+        headlineEl.textContent = headline;
     }
 
-    if (summary.savingsRate >= 10) {
-        return "You are staying in positive balance.";
+    if (detailEl) {
+        detailEl.textContent = detail;
     }
 
-    return "Your balance is positive, but savings are tight.";
+    if (badgeLabel) {
+        badgeLabel.textContent = isAiGenerated
+            ? "AI Financial Status"
+            : "Live Financial Status";
+    }
+
+}
+
+
+function getDynamicFinancialStatus(transactions, allTimeSummary, monthSummary) {
+
+    if (transactions.length === 0) {
+        return {
+            headline: "Ready to start tracking your money.",
+            detail: "Add your first income or expense transaction to unlock personal insights."
+        };
+    }
+
+    const monthCategories =
+        getCategoryBreakdown(transactions, "expense");
+
+    const topCat =
+        monthCategories[0];
+
+    const savingsRate =
+        allTimeSummary.savingsRate;
+
+    const totalExpenses =
+        allTimeSummary.expenses;
+
+    const topCatShare =
+        topCat && totalExpenses > 0
+            ? Math.round((topCat.amount / totalExpenses) * 100)
+            : 0;
+
+    let headline = "";
+    let detail = "";
+
+    if (allTimeSummary.income === 0 && totalExpenses > 0) {
+        headline = "Only expenses recorded so far.";
+        detail = topCat
+            ? `Total spent is ${formatCurrency(totalExpenses)}, with ${topCat.category} accounting for ${topCatShare}% (${formatCurrency(topCat.amount)}).`
+            : "Add your income to unlock net savings rate and full analytics.";
+    } else if (allTimeSummary.balance < 0) {
+        headline = "Expenses are outpacing your earnings.";
+        detail = topCat
+            ? `${topCat.category} is your highest expense (${formatCurrency(topCat.amount)}, ${topCatShare}% of spending). Trimming this can restore balance.`
+            : `Net deficit of ${formatCurrency(Math.abs(allTimeSummary.balance))}. Consider reviewing discretionary expenses.`;
+    } else if (savingsRate >= 45) {
+        headline = "Exceptional savings velocity this month.";
+        detail = `Saving ${savingsRate.toFixed(0)}% of total earnings (${formatCurrency(allTimeSummary.balance)} retained). ${topCat ? `${topCat.category} is your top expense at ${formatCurrency(topCat.amount)}.` : "Excellent financial discipline."}`;
+    } else if (savingsRate >= 25) {
+        headline = "Healthy cash flow with steady savings.";
+        detail = `You are saving ${savingsRate.toFixed(0)}% of your income. ${topCat ? `${topCat.category} makes up ${topCatShare}% of your outgoing spending.` : "Your finances are comfortably balanced."}`;
+    } else if (savingsRate >= 10) {
+        headline = "Positive balance with modest savings.";
+        detail = `Current savings rate is ${savingsRate.toFixed(0)}%. ${topCat ? `Cutting down on ${topCat.category} (${formatCurrency(topCat.amount)}) can boost your buffer.` : "Keep an eye on variable expenses to increase savings."}`;
+    } else {
+        headline = "Positive balance with narrow margins.";
+        detail = `You are retaining ${savingsRate.toFixed(1)}% of your income. Building an emergency reserve is recommended.`;
+    }
+
+    return { headline, detail };
+
+}
+
+
+async function requestAIStatus(forceRefresh = false) {
+
+    const transactions =
+        getTransactions();
+
+    if (transactions.length === 0) return;
+
+    const allTimeSummary =
+        getFinancialSummary(transactions);
+
+    const monthTransactions =
+        getTransactionsByPeriod("month", transactions);
+
+    const monthSummary =
+        getFinancialSummary(monthTransactions);
+
+    const txHash =
+        `${transactions.length}_${allTimeSummary.balance}_${allTimeSummary.expenses}_${allTimeSummary.income}`;
+
+    // 1. Check local cache first if not explicitly forcing a refresh
+    if (!forceRefresh) {
+        try {
+            const cached = JSON.parse(localStorage.getItem(AI_STATUS_CACHE_KEY));
+            if (cached && cached.txHash === txHash && cached.headline && cached.detail) {
+                renderStatusCardContent(cached.headline, cached.detail, true);
+                return;
+            }
+        } catch (e) {}
+    }
+
+    // 2. Display dynamic local rule-based intelligence immediately
+    const fallback =
+        getDynamicFinancialStatus(transactions, allTimeSummary, monthSummary);
+
+    renderStatusCardContent(fallback.headline, fallback.detail, false);
+
+    // 3. Request fresh AI assessment in background
+    if (isFetchingAIStatus) return;
+    isFetchingAIStatus = true;
+
+    const refreshBtn =
+        document.getElementById("refresh-ai-status-btn");
+
+    if (refreshBtn) {
+        refreshBtn.classList.add("loading");
+    }
+
+    try {
+        const response =
+            await fetch(
+                "/.netlify/functions/financial-status",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        financialContext
+                    })
+                }
+            );
+
+        if (response.ok) {
+            const data = await response.json();
+            const headline = data.headline?.trim();
+            const detail = data.detail?.trim();
+
+            if (headline) {
+                const cachePayload = {
+                    txHash,
+                    headline,
+                    detail: detail || "",
+                    timestamp: Date.now()
+                };
+
+                localStorage.setItem(AI_STATUS_CACHE_KEY, JSON.stringify(cachePayload));
+                renderStatusCardContent(headline, detail || "", true);
+            }
+        }
+    } catch (err) {
+        console.warn("AI status request note: fallback dynamic status active.", err);
+    } finally {
+        isFetchingAIStatus = false;
+        if (refreshBtn) {
+            refreshBtn.classList.remove("loading");
+        }
+    }
 
 }
 
