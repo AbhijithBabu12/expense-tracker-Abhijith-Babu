@@ -13,6 +13,9 @@ let conversationStarted = false;
  */
 let chatHistory = [];
 
+const AI_MODEL_STORAGE_KEY = "meowth_selected_ai_model";
+let selectedModel = localStorage.getItem(AI_MODEL_STORAGE_KEY) || "llama-3.3-70b-versatile";
+
 
 export function initializeAI() {
 
@@ -44,14 +47,26 @@ function renderAI() {
 
         <section class="ai-workspace">     
 
-        <button
-            type="button"
-            id="ai-new-chat"
-            class="ai-new-chat"
-        >
-            <span>＋</span>
-            New chat
-        </button>
+            <div class="ai-header-controls">
+                <button
+                    type="button"
+                    id="ai-new-chat"
+                    class="ai-new-chat"
+                    title="Start a new chat"
+                >
+                    <span>＋</span>
+                    New chat
+                </button>
+
+                <div class="ai-model-picker" title="Switch AI Model">
+                    <span class="model-sparkle">✦</span>
+                    <select id="ai-model-select" class="ai-model-select" aria-label="Select AI Model">
+                        <option value="llama-3.3-70b-versatile" ${selectedModel === "llama-3.3-70b-versatile" ? "selected" : ""}>Llama 3.3 70B</option>
+                        <option value="openai/gpt-oss-20b" ${selectedModel === "openai/gpt-oss-20b" ? "selected" : ""}>GPT OSS 20B</option>
+                    </select>
+                    <span class="model-arrow" aria-hidden="true">▾</span>
+                </div>
+            </div>
 
             <main
                 id="ai-messages"
@@ -265,6 +280,16 @@ function setupAIEvents() {
 
     }
 
+    const modelSelect =
+        document.getElementById("ai-model-select");
+
+    if (modelSelect) {
+        modelSelect.addEventListener("change", event => {
+            selectedModel = event.target.value;
+            localStorage.setItem(AI_MODEL_STORAGE_KEY, selectedModel);
+        });
+    }
+
 
     /*
      * Stop generation: clicking the send button
@@ -380,7 +405,8 @@ async function handleSubmit(event) {
                     body: JSON.stringify({
                         message: prompt,
                         financialContext,
-                        chatHistory
+                        chatHistory,
+                        model: selectedModel
                     }),
 
                     signal:

@@ -29,7 +29,8 @@ export default async (req) => {
         const {
             message,
             financialContext,
-            chatHistory
+            chatHistory,
+            model: requestedModel
         } = body;
 
 
@@ -101,29 +102,63 @@ ${JSON.stringify(
         };
 
 
-        /*
-         * Build conversation messages:
-         * system + trimmed history + current message.
-         *
-         * The current user message is already the
-         * last item in chatHistory from the frontend,
-         * so we use chatHistory directly.
-         */
-        const trimmedHistory =
+        const historyMessages =
             Array.isArray(chatHistory)
-                ? chatHistory.slice(-20)
-                : [{ role: "user", content: message }];
+                ? chatHistory
+                    .slice(-20)
+                    .map(msg => ({
+                        role:
+                            msg.role === "user"
+                                ? "user"
+                                : "assistant",
+                        content:
+                            msg.content
+                    }))
+                : [];
+
 
         const messages = [
             systemMessage,
-            ...trimmedHistory
+            ...historyMessages,
+            {
+                role: "user",
+                content: message
+            }
         ];
 
 
         /*
-         * The API key exists ONLY on the
-         * Netlify server/function.
+         * Pick the model and API key.
+         * GROQ_GPT is dedicated for openai/gpt-oss-20b.
+         * GROQ_API_KEY is for llama-3.3-70b-versatile.
          */
+
+        const isGptModel =
+            requestedModel === "openai/gpt-oss-20b";
+
+        const selectedModel =
+            isGptModel
+                ? "openai/gpt-oss-20b"
+                : "llama-3.3-70b-versatile";
+
+        const apiKey =
+            isGptModel
+                ? (process.env.GROQ_GPT || process.env.GROQ_API_KEY)
+                : (process.env.GROQ_API_KEY || process.env.GROQ_GPT);
+
+        if (!apiKey) {
+            return new Response(
+                JSON.stringify({
+                    error: "API key is not configured for the selected model."
+                }),
+                {
+                    status: 500,
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
+        }
 
         const groqResponse =
             await fetch(
@@ -134,12 +169,12 @@ ${JSON.stringify(
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization":
-                            `Bearer ${process.env.GROQ_API_KEY}`
+                            `Bearer ${apiKey}`
                     },
 
                     body: JSON.stringify({
 
-                        model: "openai/gpt-oss-20b",
+                        model: selectedModel,
 
                         messages,
 

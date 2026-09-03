@@ -484,11 +484,25 @@
 
 @media (max-width: 520px) {
 
-    .ai-new-chat {
+    .ai-header-controls {
         top: 138px;
         left: 16px;
-        padding: 7px 14px;
+        gap: 6px;
+    }
+
+    .ai-new-chat {
+        padding: 7px 13px;
         font-size: 12px;
+    }
+
+    .ai-model-picker {
+        height: 33px;
+        padding: 0 10px 0 9px;
+    }
+
+    .ai-model-select {
+        font-size: 12px;
+        padding-right: 12px;
     }
 
     .ai-messages {
