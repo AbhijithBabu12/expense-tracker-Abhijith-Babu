@@ -310,9 +310,9 @@ function exportPdf() {
     doc.text(`Generated: ${new Date().toLocaleString("en-IN")}`, 14, 26);
 
     doc.setFontSize(12);
-    doc.text(`Total income: ${formatCurrency(summary.income)}`, 14, 40);
-    doc.text(`Total expense: ${formatCurrency(summary.expenses)}`, 14, 48);
-    doc.text(`Balance: ${formatCurrency(summary.balance)}`, 14, 56);
+    doc.text(`Total income: ${formatCurrencyForPdf(summary.income)}`, 14, 40);
+    doc.text(`Total expense: ${formatCurrencyForPdf(summary.expenses)}`, 14, 48);
+    doc.text(`Balance: ${formatCurrencyForPdf(summary.balance)}`, 14, 56);
 
     doc.autoTable({
         startY: 68,
@@ -321,14 +321,14 @@ function exportPdf() {
             "Type",
             "Category",
             "Description",
-            "Amount"
+            "Amount (Rs)"
         ]],
         body: rows.map(row => [
             row.Date,
             row.Type,
             row.Category,
             row.Description,
-            row.Amount
+            formatNumberForPdf(row.Amount)
         ]),
         styles: {
             fontSize: 8,
@@ -513,6 +513,32 @@ function formatCurrency(value) {
             style: "currency",
             currency: "INR",
             maximumFractionDigits: 0
+        }
+    ).format(value);
+
+}
+
+
+function formatCurrencyForPdf(value) {
+
+    return "Rs " + new Intl.NumberFormat(
+        "en-IN",
+        {
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 2
+        }
+    ).format(value);
+
+}
+
+
+function formatNumberForPdf(value) {
+
+    return new Intl.NumberFormat(
+        "en-IN",
+        {
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 2
         }
     ).format(value);
 

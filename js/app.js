@@ -6,6 +6,7 @@ import { initializeHistory } from "./pages/history.js";
 import { initializeAnalytics } from "./pages/analytics.js";
 import { initializeDashboard } from "./pages/dashboard.js";
 import { initializeAI } from "./pages/ai.js";
+import { initializeImportExport } from "./features/importExport.js";
 
 import { buildFinancialContext } from "./ai/contextBuilder.js";
 
@@ -23,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("HOME DONE");
 
     initializeHistory();
+    initializeImportExport();
 
     console.log("HISTORY DONE");
 
