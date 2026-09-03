@@ -422,6 +422,11 @@ function openFilterModal() {
         modal.classList.remove("hidden");
     }
 
+    const aiButton = document.getElementById("mobile-ai-button");
+    if (aiButton) {
+        aiButton.style.setProperty("display", "none", "important");
+    }
+
 }
 
 
@@ -430,6 +435,11 @@ function closeFilterModal() {
     const modal = document.getElementById("filter-modal");
     if (modal) {
         modal.classList.add("hidden");
+    }
+
+    const aiButton = document.getElementById("mobile-ai-button");
+    if (aiButton) {
+        aiButton.style.removeProperty("display");
     }
 
 }
@@ -1141,9 +1151,14 @@ function createTransactionHTML(transaction) {
             ? "+"
             : "-";
 
-    const icon =
-        categoryIcons[transaction.category] ||
-        categoryIcons.Other;
+    const dayName =
+        getDayName(transaction.date);
+
+    const timeStr =
+        transaction.time ? formatTime(transaction.time) : "";
+
+    const dateSub =
+        [dayName, timeStr].filter(Boolean).join(", ");
 
     return `
         <article
@@ -1154,8 +1169,8 @@ function createTransactionHTML(transaction) {
                 class="transaction-date"
                 datetime="${transaction.date}"
             >
-                ${formatDate(transaction.date)}
-                ${transaction.time ? `<span>${formatTime(transaction.time)}</span>` : ""}
+                <span class="date-main">${formatDate(transaction.date)}</span>
+                ${dateSub ? `<span class="date-sub">${dateSub}</span>` : ""}
             </time>
 
             <div class="transaction-main">
@@ -1838,6 +1853,21 @@ function formatDate(dateString) {
     ).format(
         new Date(`${dateString}T00:00:00`)
     );
+
+}
+
+
+function getDayName(dateString, format = "long") {
+
+    try {
+        const date = new Date(`${dateString}T00:00:00`);
+        if (Number.isNaN(date.getTime())) {
+            return "";
+        }
+        return new Intl.DateTimeFormat("en-IN", { weekday: format }).format(date);
+    } catch (e) {
+        return "";
+    }
 
 }
 
