@@ -54,6 +54,18 @@ export function renderNavbar() {
 
     setupNavigation();
     setupMobileAI();
+
+    const savedPage = getPageFromHash();
+    if (savedPage) {
+        navigateTo(savedPage, false);
+    }
+
+    window.addEventListener("hashchange", () => {
+        const page = getPageFromHash();
+        if (page) {
+            navigateTo(page, false);
+        }
+    });
 }
 
 
@@ -93,7 +105,7 @@ function setupMobileAI() {
 }
 
 
-export function navigateTo(pageName) {
+export function navigateTo(pageName, updateHash = true) {
 
     document
         .querySelectorAll(".page")
@@ -121,8 +133,29 @@ export function navigateTo(pageName) {
 
         });
 
+    if (updateHash) {
+        window.location.hash = pageName;
+    }
+
     window.scrollTo({
         top: 0,
         behavior: "smooth"
     });
+}
+
+
+function getPageFromHash() {
+
+    const hash =
+        window.location.hash.replace("#", "").trim();
+
+    const validPages =
+        pages.map(page => page.id);
+
+    if (validPages.includes(hash)) {
+        return hash;
+    }
+
+    return null;
+
 }

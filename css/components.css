@@ -138,11 +138,16 @@
     transition: 
         opacity var(--transition-normal),
         transform var(--transition-normal);
+
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .app-toast.visible {
     opacity: 1;
     transform: translate(-50%, 0);
+    pointer-events: auto;
 }
 
 .app-toast.error {
