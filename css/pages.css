@@ -249,19 +249,16 @@
 /* Controls */
 
 .history-controls {
-    display: grid;
-
-    grid-template-columns: 1fr auto auto auto;
-
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-
-    gap: 16px;
-
-    margin-bottom: 32px;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
 .search-wrapper {
     position: relative;
+    flex: 1 1 240px;
 }
 
 .search-wrapper input {
@@ -365,6 +362,253 @@
     color: var(--color-text-primary);
 
     font-size: 13px;
+}
+
+
+/* Filter Toggle Button & Badge */
+
+.filter-toggle-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 46px;
+    padding: 0 18px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 12px;
+}
+
+.filter-badge {
+    background: var(--color-text-primary);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    line-height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-badge.hidden {
+    display: none;
+}
+
+
+/* Active Filter Chips Under Search */
+
+.active-filter-chips {
+    margin-bottom: 22px;
+}
+
+.active-filter-chips.hidden {
+    display: none;
+}
+
+.active-chips-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.active-chip {
+    appearance: none;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.active-chip:hover {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+.chip-remove {
+    font-size: 10px;
+    opacity: 0.6;
+}
+
+.active-chip-clear {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 6px 8px;
+}
+
+.active-chip-clear:hover {
+    color: var(--color-text-primary);
+}
+
+
+/* Filter Drawer / Modal (Shopping App Style) */
+
+.filter-drawer {
+    width: min(620px, 100%);
+    max-height: calc(100vh - 60px);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 24px;
+}
+
+.filter-drawer-header {
+    padding: 22px 28px 18px;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.filter-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.filter-drawer-body {
+    padding: 24px 28px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    flex: 1;
+}
+
+.filter-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.filter-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.filter-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-secondary);
+}
+
+.filter-section-sub {
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
+.filter-chips-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.filter-chip {
+    appearance: none;
+    border: 1px solid var(--color-border);
+    background: var(--color-background);
+    color: var(--color-text-primary);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+}
+
+.filter-chip:hover {
+    border-color: var(--color-border-focus);
+    background: var(--color-surface);
+}
+
+.filter-chip.active {
+    background: var(--color-text-primary);
+    color: #ffffff;
+    border-color: var(--color-text-primary);
+}
+
+.filter-custom-date-inputs,
+.filter-custom-time-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 6px;
+}
+
+.filter-custom-date-inputs.hidden,
+.filter-custom-time-inputs.hidden {
+    display: none;
+}
+
+.compact-input {
+    height: 42px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font-size: 13px;
+    width: 100%;
+}
+
+.compact-input:focus {
+    outline: none;
+    border-color: var(--color-border-focus);
+}
+
+.filter-price-inputs {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.filter-price-inputs .amount-input-wrapper {
+    flex: 1;
+}
+
+.price-separator {
+    color: var(--color-text-muted);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.filter-drawer-actions {
+    padding: 16px 28px 20px;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
 }
 
 

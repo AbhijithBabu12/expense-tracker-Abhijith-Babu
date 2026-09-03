@@ -65,8 +65,8 @@
     }
 
     .history-controls {
-        grid-template-columns: 1fr;
-
+        flex-direction: column;
+        align-items: stretch;
         gap: 12px;
     }
 
@@ -74,8 +74,37 @@
         justify-content: center;
     }
 
-    .category-filter {
+    .filter-toggle-button {
         width: 100%;
+        justify-content: center;
+    }
+
+    .filter-drawer {
+        width: 100%;
+        max-height: 88vh;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        border-top-left-radius: 24px;
+        border-top-right-radius: 24px;
+        margin-top: auto;
+    }
+
+    .modal-backdrop.filter-modal-backdrop {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .filter-drawer-header {
+        padding: 18px 20px 14px;
+    }
+
+    .filter-drawer-body {
+        padding: 18px 20px;
+        gap: 20px;
+    }
+
+    .filter-drawer-actions {
+        padding: 14px 20px 20px;
     }
 
     .export-actions {
