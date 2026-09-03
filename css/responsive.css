@@ -47,11 +47,6 @@
         flex-direction: column;
     }
 
-    .ai-chat-toolbar {
-        width: calc(100% - 24px);
-        padding: 130px 0 6px;
-    }
-
     .ai-new-chat {
         padding: 7px 12px;
         font-size: 12px;
@@ -336,21 +331,11 @@
 @media (max-width: 800px) {
 
     .ai-container {
-        padding: 120px 18px 60px;
-    }
-
-    .ai-hero h1 {
-        font-size: 44px;
-    }
-
-    .ai-description {
-        font-size: 16px;
+        padding: 0;
     }
 
     .ai-messages {
-        min-height: 280px;
-        padding: 22px;
-        border-radius: 20px;
+        padding: 120px 20px 150px;
     }
 
     .ai-suggestion-grid {
@@ -383,24 +368,21 @@
     }
 
 
-    body[data-active-page="ai"] .ai-chat-toolbar {
-        padding: 20px 0 6px;
-    }
-
     body[data-active-page="ai"] .ai-mobile-back {
         display: block;
+        top: 20px;
+        left: 18px;
     }
 
     .ai-new-chat {
-        padding:
-            8px 10px;
+        top: 20px;
+        padding: 8px 10px;
     }
 
 
     .ai-messages {
         width: 100%;
-        padding:
-            10px 18px 150px;
+        padding: 70px 18px 150px;
         box-sizing: border-box;
     }
 

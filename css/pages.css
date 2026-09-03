@@ -338,6 +338,7 @@
     color: var(--color-text-primary);
 }
 
+
 .filter-button.active {
     background: white;
 
@@ -1535,48 +1536,6 @@
 ========================================= */
 
 .ai-container {
-    max-width: var(--max-width);
-    margin: 0 auto;
-    padding: 120px 28px 80px;
-}
-
-.ai-hero {
-    margin-bottom: 48px;
-}
-
-.ai-hero-copy {
-    max-width: 760px;
-}
-
-.ai-hero h1 {
-    margin: 10px 0 18px;
-
-    font-size: 64px;
-    line-height: 1.02;
-    letter-spacing: 0;
-    font-weight: 600;
-}
-
-.ai-hero h1 span {
-    display: block;
-    color: var(--color-text-secondary);
-}
-
-.ai-description {
-    max-width: 580px;
-    margin: 0;
-
-    color: var(--color-text-secondary);
-
-    font-size: 17px;
-    line-height: 1.5;
-}
-
-/* =========================================================
-   AI WORKSPACE
-   ========================================================= */
-
-.ai-container {
     max-width: none;
     padding: 0;
 }
@@ -1591,20 +1550,6 @@
     position: relative;
 }
 
-
-
-.ai-chat-toolbar {
-    width: min(900px, calc(100% - 40px));
-    margin: 0 auto;
-    padding: 110px 0 10px;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    flex-shrink: 0;
-}
-
 .ai-mobile-back {
     display: none;
     appearance: none;
@@ -1615,6 +1560,11 @@
     font-weight: 600;
     cursor: pointer;
     padding: 8px 0;
+
+    position: fixed;
+    top: 100px;
+    left: 24px;
+    z-index: 60;
 }
 
 .ai-new-chat {
@@ -1631,18 +1581,27 @@
 
     cursor: pointer;
     transition: var(--transition-fast);
+
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 60;
+
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .ai-new-chat:hover {
     color: var(--color-text-primary);
     border-color: var(--color-border-focus);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
 }
 
 /* =========================================================
    CHAT AREA
    ========================================================= */
 
-   .ai-messages {
+.ai-messages {
     width: min(900px, calc(100% - 40px));
     margin: 0 auto;
 
@@ -1651,8 +1610,8 @@
 
     overflow-y: auto;
     scroll-behavior: auto;
-    
-    padding: 10px 0 140px;
+
+    padding: 130px 0 140px;
 }
 
 
