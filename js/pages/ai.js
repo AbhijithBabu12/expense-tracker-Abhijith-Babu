@@ -47,26 +47,15 @@ function renderAI() {
 
         <section class="ai-workspace">     
 
-            <div class="ai-header-controls">
-                <button
-                    type="button"
-                    id="ai-new-chat"
-                    class="ai-new-chat"
-                    title="Start a new chat"
-                >
-                    <span>＋</span>
-                    New chat
-                </button>
-
-                <div class="ai-model-picker" title="Switch AI Model">
-                    <span class="model-sparkle">✦</span>
-                    <select id="ai-model-select" class="ai-model-select" aria-label="Select AI Model">
-                        <option value="llama-3.3-70b-versatile" ${selectedModel === "llama-3.3-70b-versatile" ? "selected" : ""}>Llama 3.3 70B</option>
-                        <option value="openai/gpt-oss-20b" ${selectedModel === "openai/gpt-oss-20b" ? "selected" : ""}>GPT OSS 20B</option>
-                    </select>
-                    <span class="model-arrow" aria-hidden="true">▾</span>
-                </div>
-            </div>
+            <button
+                type="button"
+                id="ai-new-chat"
+                class="ai-new-chat"
+                title="Start a new chat"
+            >
+                <span>＋</span>
+                New chat
+            </button>
 
             <main
                 id="ai-messages"
@@ -135,14 +124,63 @@ function renderAI() {
                         aria-label="Ask Meowth AI"
                     ></textarea>
 
-                    <button
-                        type="submit"
-                        id="ai-send-button"
-                        class="ai-send-button"
-                        aria-label="Send message"
-                    >
-                        ↑
-                    </button>
+                    <div class="ai-composer-actions">
+                        <div class="ai-model-box" id="ai-model-box">
+                            <button
+                                type="button"
+                                id="ai-model-trigger"
+                                class="ai-model-pill-btn"
+                                title="Change AI Model"
+                                aria-haspopup="listbox"
+                                aria-expanded="false"
+                            >
+                                <span class="model-sparkle">✦</span>
+                                <span id="ai-model-pill-label" class="model-pill-text">
+                                    ${selectedModel === "openai/gpt-oss-20b" ? "GPT OSS 20B" : "Llama 3.3 70B"}
+                                </span>
+                                <svg class="model-caret-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+
+                            <div class="custom-dropdown-menu dropup ai-model-dropdown-menu hidden" id="ai-model-dropdown-menu" role="listbox">
+                                <div class="dropdown-header-tag">Select Model</div>
+
+                                <button
+                                    type="button"
+                                    class="custom-dropdown-item ai-model-opt ${selectedModel === "llama-3.3-70b-versatile" ? "active" : ""}"
+                                    data-model="llama-3.3-70b-versatile"
+                                >
+                                    <div class="model-opt-info">
+                                        <span class="model-opt-name">Llama 3.3 70B</span>
+                                        <span class="model-opt-desc">Deep financial analysis & trends</span>
+                                    </div>
+                                    <span class="item-check">✓</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="custom-dropdown-item ai-model-opt ${selectedModel === "openai/gpt-oss-20b" ? "active" : ""}"
+                                    data-model="openai/gpt-oss-20b"
+                                >
+                                    <div class="model-opt-info">
+                                        <span class="model-opt-name">GPT OSS 20B</span>
+                                        <span class="model-opt-desc">Fast, sharp & responsive insights</span>
+                                    </div>
+                                    <span class="item-check">✓</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            id="ai-send-button"
+                            class="ai-send-button"
+                            aria-label="Send message"
+                        >
+                            ↑
+                        </button>
+                    </div>
 
                 </form>
 
@@ -280,13 +318,62 @@ function setupAIEvents() {
 
     }
 
-    const modelSelect =
-        document.getElementById("ai-model-select");
+    const modelTrigger =
+        document.getElementById("ai-model-trigger");
 
-    if (modelSelect) {
-        modelSelect.addEventListener("change", event => {
-            selectedModel = event.target.value;
-            localStorage.setItem(AI_MODEL_STORAGE_KEY, selectedModel);
+    const modelDropdown =
+        document.getElementById("ai-model-dropdown-menu");
+
+    const modelLabel =
+        document.getElementById("ai-model-pill-label");
+
+    function closeModelDropdown() {
+        if (modelDropdown) {
+            modelDropdown.classList.add("hidden");
+        }
+        if (modelTrigger) {
+            modelTrigger.setAttribute("aria-expanded", "false");
+        }
+    }
+
+    if (modelTrigger && modelDropdown) {
+        modelTrigger.addEventListener("click", e => {
+            e.stopPropagation();
+            const isHidden = modelDropdown.classList.contains("hidden");
+            if (isHidden) {
+                modelDropdown.classList.remove("hidden");
+                modelTrigger.setAttribute("aria-expanded", "true");
+            } else {
+                closeModelDropdown();
+            }
+        });
+
+        modelDropdown.querySelectorAll(".ai-model-opt").forEach(opt => {
+            opt.addEventListener("click", e => {
+                e.stopPropagation();
+                const model = opt.dataset.model;
+                selectedModel = model;
+                localStorage.setItem(AI_MODEL_STORAGE_KEY, selectedModel);
+
+                if (modelLabel) {
+                    modelLabel.textContent =
+                        model === "openai/gpt-oss-20b"
+                            ? "GPT OSS 20B"
+                            : "Llama 3.3 70B";
+                }
+
+                modelDropdown.querySelectorAll(".ai-model-opt").forEach(o => {
+                    o.classList.toggle("active", o.dataset.model === model);
+                });
+
+                closeModelDropdown();
+            });
+        });
+
+        document.addEventListener("click", e => {
+            if (!e.target.closest("#ai-model-box")) {
+                closeModelDropdown();
+            }
         });
     }
 

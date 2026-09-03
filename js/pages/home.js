@@ -32,6 +32,21 @@ const categoryOptions = {
     ]
 };
 
+const categoryIcons = {
+    Food: "🍔",
+    Transport: "🚗",
+    Shopping: "🛍️",
+    Bills: "📄",
+    Entertainment: "🎬",
+    Health: "🩺",
+    Salary: "💰",
+    Freelance: "💻",
+    Business: "📈",
+    Investment: "📊",
+    Gift: "🎁",
+    Other: "✦"
+};
+
 
 export function initializeHome() {
 
@@ -64,6 +79,7 @@ export function initializeHome() {
     timeInput.value =
         now.toTimeString().slice(0, 5);
 
+    setupCategoryCustomDropdown(categorySelect);
     renderCategoryOptions(categorySelect);
 
     // --------------------------------
@@ -103,6 +119,7 @@ export function initializeHome() {
         const isOther =
             categorySelect.value === "Other";
 
+        updateCategoryTriggerDisplay(categorySelect.value);
 
         customCategoryGroup.classList.toggle(
             "hidden",
@@ -245,6 +262,7 @@ export function initializeHome() {
         });
 
         renderCategoryOptions(categorySelect);
+        updateCategoryTriggerDisplay("");
 
         showNotification("Transaction added successfully.");
 
@@ -252,13 +270,117 @@ export function initializeHome() {
 
 }
 
+
+function setupCategoryCustomDropdown(select) {
+
+    const trigger =
+        document.getElementById("category-trigger-btn");
+
+    const menu =
+        document.getElementById("category-dropdown-menu");
+
+    if (!trigger || !menu) return;
+
+    trigger.addEventListener("click", e => {
+        e.stopPropagation();
+        const isOpen = !menu.classList.contains("hidden");
+        if (isOpen) {
+            menu.classList.add("hidden");
+            trigger.setAttribute("aria-expanded", "false");
+        } else {
+            menu.classList.remove("hidden");
+            trigger.setAttribute("aria-expanded", "true");
+        }
+    });
+
+    document.addEventListener("click", e => {
+        if (!e.target.closest("#category-dropdown-container")) {
+            menu.classList.add("hidden");
+            trigger.setAttribute("aria-expanded", "false");
+        }
+    });
+
+}
+
+
+function updateCategoryTriggerDisplay(value) {
+
+    const triggerText =
+        document.getElementById("category-trigger-text");
+
+    if (!triggerText) return;
+
+    if (!value) {
+        triggerText.innerHTML = `
+            <span class="cat-pill-icon">✦</span>
+            <span>Select category</span>
+        `;
+        return;
+    }
+
+    const icon =
+        categoryIcons[value] || "✦";
+
+    triggerText.innerHTML = `
+        <span class="cat-pill-icon">${icon}</span>
+        <span>${value}</span>
+    `;
+
+}
+
+
 function renderCategoryOptions(select) {
+
+    const list =
+        categoryOptions[transactionType];
+
     select.innerHTML = `
         <option value="">Select category</option>
-        ${categoryOptions[transactionType]
-            .map(category => `
-                <option value="${category}">${category}</option>
-            `)
-            .join("")}
+        ${list.map(category => `<option value="${category}">${category}</option>`).join("")}
     `;
+
+    updateCategoryTriggerDisplay(select.value);
+
+    const menu =
+        document.getElementById("category-dropdown-menu");
+
+    if (!menu) return;
+
+    menu.innerHTML = list.map(category => {
+        const icon = categoryIcons[category] || "✦";
+        const isActive = select.value === category;
+        return `
+            <button
+                type="button"
+                class="custom-dropdown-item cat-custom-item ${isActive ? "active" : ""}"
+                data-category="${category}"
+            >
+                <span class="custom-dropdown-item-left">
+                    <span class="cat-item-icon">${icon}</span>
+                    <span>${category}</span>
+                </span>
+                <span class="item-check">✓</span>
+            </button>
+        `;
+    }).join("");
+
+    menu.querySelectorAll(".cat-custom-item").forEach(item => {
+        item.addEventListener("click", e => {
+            e.stopPropagation();
+            const cat = item.dataset.category;
+            select.value = cat;
+            select.dispatchEvent(new Event("change"));
+
+            updateCategoryTriggerDisplay(cat);
+
+            menu.querySelectorAll(".cat-custom-item").forEach(i => {
+                i.classList.toggle("active", i.dataset.category === cat);
+            });
+
+            menu.classList.add("hidden");
+            const trigger = document.getElementById("category-trigger-btn");
+            if (trigger) trigger.setAttribute("aria-expanded", "false");
+        });
+    });
+
 }

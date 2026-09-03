@@ -17,7 +17,9 @@ export default async (req) => {
 
         // Dedicated API key for the dashboard AI flash status card
         const apiKey =
-            process.env.AI_FLASH_CARD || process.env.GROQ_API_KEY;
+            process.env.AI_FLASH_CARD ||
+            process.env.GROQ_API_KEY ||
+            process.env.GROQ_GPT;
 
         if (!apiKey) {
             return new Response(
@@ -41,7 +43,7 @@ HEADLINE | DETAIL
 
 STRICT FORMATTING RULES:
 1. HEADLINE: 1 punchy, natural sentence (max 8 words) summarizing their current standing (e.g. "Healthy cash flow with steady savings." or "Expenses are outpacing your earnings.").
-2. DETAIL: 1 helpful, concrete sentence (max 18 words) highlighting their top category or savings percentage with friendly advice.
+2. DETAIL: 1 helpful, concrete sentence (max 22 words) highlighting their top spending category or savings percentage with friendly advice.
 3. Use Indian Rupee (₹) symbol if mentioning currency amounts.
 4. Output ONLY "HEADLINE | DETAIL" without quotation marks, bullet points, asterisks, or extra text.`;
 
@@ -61,8 +63,8 @@ STRICT FORMATTING RULES:
                         { role: "system", content: systemPrompt },
                         { role: "user", content: userPrompt }
                     ],
-                    temperature: 0.2,
-                    max_tokens: 75
+                    temperature: 0.3,
+                    max_tokens: 120
                 })
             });
 

@@ -1361,7 +1361,28 @@ function createEditModal() {
                             id="edit-category"
                             name="category"
                             required
+                            class="native-hidden-select"
                         ></select>
+
+                        <div class="custom-dropdown-container" id="edit-category-dropdown-container">
+                            <button
+                                type="button"
+                                class="custom-dropdown-trigger"
+                                id="edit-category-trigger-btn"
+                                aria-haspopup="listbox"
+                                aria-expanded="false"
+                            >
+                                <span class="custom-dropdown-selected" id="edit-category-trigger-text">
+                                    <span class="cat-pill-icon">✦</span>
+                                    <span>Select category</span>
+                                </span>
+                                <svg class="custom-dropdown-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+
+                            <div class="custom-dropdown-menu hidden" id="edit-category-dropdown-menu" role="listbox"></div>
+                        </div>
                     </div>
 
                     <div
@@ -1476,6 +1497,33 @@ function setupEditModalEvents() {
         updateEditCustomCategoryVisibility
     );
 
+    const editCatTrigger =
+        document.getElementById("edit-category-trigger-btn");
+
+    const editCatMenu =
+        document.getElementById("edit-category-dropdown-menu");
+
+    if (editCatTrigger && editCatMenu) {
+        editCatTrigger.addEventListener("click", e => {
+            e.stopPropagation();
+            const isOpen = !editCatMenu.classList.contains("hidden");
+            if (isOpen) {
+                editCatMenu.classList.add("hidden");
+                editCatTrigger.setAttribute("aria-expanded", "false");
+            } else {
+                editCatMenu.classList.remove("hidden");
+                editCatTrigger.setAttribute("aria-expanded", "true");
+            }
+        });
+
+        document.addEventListener("click", e => {
+            if (!e.target.closest("#edit-category-dropdown-container")) {
+                editCatMenu.classList.add("hidden");
+                editCatTrigger.setAttribute("aria-expanded", "false");
+            }
+        });
+    }
+
     form.addEventListener("submit", event => {
 
         event.preventDefault();
@@ -1551,6 +1599,32 @@ function closeEditModal() {
 }
 
 
+function updateEditCategoryTriggerDisplay(value) {
+
+    const triggerText =
+        document.getElementById("edit-category-trigger-text");
+
+    if (!triggerText) return;
+
+    if (!value) {
+        triggerText.innerHTML = `
+            <span class="cat-pill-icon">✦</span>
+            <span>Select category</span>
+        `;
+        return;
+    }
+
+    const icon =
+        categoryIcons[value] || "✦";
+
+    triggerText.innerHTML = `
+        <span class="cat-pill-icon">${icon}</span>
+        <span>${escapeHTML(value)}</span>
+    `;
+
+}
+
+
 function renderEditCategoryOptions(currentCategory) {
 
     const select =
@@ -1567,6 +1641,10 @@ function renderEditCategoryOptions(currentCategory) {
                 currentCategory
             ];
 
+    if (!optionCategories.includes("Other")) {
+        optionCategories.push("Other");
+    }
+
     select.innerHTML = `
         <option value="">Select category</option>
         ${optionCategories.map(category => `
@@ -1574,8 +1652,51 @@ function renderEditCategoryOptions(currentCategory) {
                 ${escapeHTML(category)}
             </option>
         `).join("")}
-        <option value="Other">Other</option>
     `;
+
+    updateEditCategoryTriggerDisplay(currentCategory);
+
+    const menu =
+        document.getElementById("edit-category-dropdown-menu");
+
+    if (!menu) return;
+
+    menu.innerHTML = optionCategories.map(cat => {
+        const icon = categoryIcons[cat] || "✦";
+        const isActive = cat === currentCategory;
+        return `
+            <button
+                type="button"
+                class="custom-dropdown-item edit-cat-item ${isActive ? "active" : ""}"
+                data-category="${escapeHTML(cat)}"
+            >
+                <span class="custom-dropdown-item-left">
+                    <span class="cat-item-icon">${icon}</span>
+                    <span>${escapeHTML(cat)}</span>
+                </span>
+                <span class="item-check">✓</span>
+            </button>
+        `;
+    }).join("");
+
+    menu.querySelectorAll(".edit-cat-item").forEach(item => {
+        item.addEventListener("click", e => {
+            e.stopPropagation();
+            const cat = item.dataset.category;
+            select.value = cat;
+            select.dispatchEvent(new Event("change"));
+
+            updateEditCategoryTriggerDisplay(cat);
+
+            menu.querySelectorAll(".edit-cat-item").forEach(i => {
+                i.classList.toggle("active", i.dataset.category === cat);
+            });
+
+            menu.classList.add("hidden");
+            const trigger = document.getElementById("edit-category-trigger-btn");
+            if (trigger) trigger.setAttribute("aria-expanded", "false");
+        });
+    });
 
 }
 

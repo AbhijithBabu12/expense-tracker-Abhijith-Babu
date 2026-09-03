@@ -353,48 +353,77 @@ function getDynamicFinancialStatus(transactions, allTimeSummary, monthSummary) {
         };
     }
 
-    const monthCategories =
-        getCategoryBreakdown(transactions, "expense");
+    const monthTransactions =
+        getTransactionsByPeriod("month", transactions);
+
+    const recentExpenses =
+        transactions.filter(t => t.type === "expense");
+
+    const monthExpenses =
+        monthTransactions.filter(t => t.type === "expense");
+
+    const activeExpenses =
+        monthExpenses.length > 0 ? monthExpenses : recentExpenses;
+
+    const categories =
+        getCategoryBreakdown(activeExpenses, "expense");
 
     const topCat =
-        monthCategories[0];
+        categories[0];
 
-    const savingsRate =
-        allTimeSummary.savingsRate;
+    const currentExpenses =
+        monthSummary.expenses > 0 ? monthSummary.expenses : allTimeSummary.expenses;
 
-    const totalExpenses =
-        allTimeSummary.expenses;
+    const currentIncome =
+        monthSummary.income > 0 ? monthSummary.income : allTimeSummary.income;
+
+    const currentBalance =
+        currentIncome - currentExpenses;
 
     const topCatShare =
-        topCat && totalExpenses > 0
-            ? Math.round((topCat.amount / totalExpenses) * 100)
+        topCat && currentExpenses > 0
+            ? Math.round((topCat.amount / currentExpenses) * 100)
             : 0;
 
     let headline = "";
     let detail = "";
 
-    if (allTimeSummary.income === 0 && totalExpenses > 0) {
-        headline = "Only expenses recorded so far.";
+    if (currentIncome === 0 && currentExpenses > 0) {
+        headline = "Heavy outgoing spending with zero income logged.";
         detail = topCat
-            ? `Total spent is ${formatCurrency(totalExpenses)}, with ${topCat.category} accounting for ${topCatShare}% (${formatCurrency(topCat.amount)}).`
-            : "Add your income to unlock net savings rate and full analytics.";
-    } else if (allTimeSummary.balance < 0) {
-        headline = "Expenses are outpacing your earnings.";
+            ? `You've spent ${formatCurrency(currentExpenses)}, with ${topCat.category} taking up ${topCatShare}% (${formatCurrency(topCat.amount)}). Log your earnings to balance cash flow.`
+            : `Total spending is ${formatCurrency(currentExpenses)}. Record your earnings to calculate your savings rate.`;
+    } else if (currentBalance < 0 || (monthSummary.income > 0 && monthSummary.balance < 0)) {
+        headline = "Monthly expenses are outpacing your earnings.";
         detail = topCat
-            ? `${topCat.category} is your highest expense (${formatCurrency(topCat.amount)}, ${topCatShare}% of spending). Trimming this can restore balance.`
-            : `Net deficit of ${formatCurrency(Math.abs(allTimeSummary.balance))}. Consider reviewing discretionary expenses.`;
-    } else if (savingsRate >= 45) {
-        headline = "Exceptional savings velocity this month.";
-        detail = `Saving ${savingsRate.toFixed(0)}% of total earnings (${formatCurrency(allTimeSummary.balance)} retained). ${topCat ? `${topCat.category} is your top expense at ${formatCurrency(topCat.amount)}.` : "Excellent financial discipline."}`;
-    } else if (savingsRate >= 25) {
-        headline = "Healthy cash flow with steady savings.";
-        detail = `You are saving ${savingsRate.toFixed(0)}% of your income. ${topCat ? `${topCat.category} makes up ${topCatShare}% of your outgoing spending.` : "Your finances are comfortably balanced."}`;
-    } else if (savingsRate >= 10) {
-        headline = "Positive balance with modest savings.";
-        detail = `Current savings rate is ${savingsRate.toFixed(0)}%. ${topCat ? `Cutting down on ${topCat.category} (${formatCurrency(topCat.amount)}) can boost your buffer.` : "Keep an eye on variable expenses to increase savings."}`;
+            ? `${topCat.category} is your highest expense at ${formatCurrency(topCat.amount)} (${topCatShare}% of spending). Slow down spending to recover a positive balance.`
+            : `You are currently spending faster than you earn (Deficit: ${formatCurrency(Math.abs(currentBalance))}).`;
     } else {
-        headline = "Positive balance with narrow margins.";
-        detail = `You are retaining ${savingsRate.toFixed(1)}% of your income. Building an emergency reserve is recommended.`;
+        const spentRatio =
+            currentIncome > 0 ? (currentExpenses / currentIncome) * 100 : 0;
+
+        const currentSavingsRate =
+            Math.max(0, 100 - spentRatio);
+
+        if (spentRatio >= 80) {
+            headline = "Spending is running high relative to income.";
+            detail = topCat
+                ? `You have already spent ${spentRatio.toFixed(0)}% of earnings. ${topCat.category} accounts for ${formatCurrency(topCat.amount)} (${topCatShare}%).`
+                : `You've used ${spentRatio.toFixed(0)}% of earnings. Margins are slim—watch discretionary purchases.`;
+        } else if (spentRatio >= 50) {
+            headline = "Moderate cash flow with active spending.";
+            detail = topCat
+                ? `${topCat.category} is leading your expenses at ${formatCurrency(topCat.amount)} (${topCatShare}%). You are currently retaining ${currentSavingsRate.toFixed(0)}% of earnings.`
+                : `You are retaining ${currentSavingsRate.toFixed(0)}% of your income. Finances are in a balanced position.`;
+        } else if (spentRatio >= 20) {
+            headline = "Strong savings velocity and healthy margins.";
+            detail = topCat
+                ? `You're saving ${currentSavingsRate.toFixed(0)}% of earnings after ${formatCurrency(currentExpenses)} spent. ${topCat.category} is highest at ${formatCurrency(topCat.amount)}.`
+                : `Solid financial position—saving ${currentSavingsRate.toFixed(0)}% of your income.`;
+        } else {
+            headline = "Exceptional savings with minimal spending.";
+            detail = `Over ${currentSavingsRate.toFixed(0)}% of income is preserved. Only ${formatCurrency(currentExpenses)} spent so far.`;
+        }
     }
 
     return { headline, detail };
@@ -421,8 +450,13 @@ async function requestAIStatus(forceRefresh = false) {
     const txHash =
         `${transactions.length}_${allTimeSummary.balance}_${allTimeSummary.expenses}_${allTimeSummary.income}`;
 
-    // 1. Check local cache first if not explicitly forcing a refresh
-    if (!forceRefresh) {
+    // If user clicked refresh, clear cached status to guarantee a fresh AI run
+    if (forceRefresh) {
+        try {
+            localStorage.removeItem(AI_STATUS_CACHE_KEY);
+        } catch (e) {}
+    } else {
+        // 1. Check local cache first if not explicitly forcing a refresh
         try {
             const cached = JSON.parse(localStorage.getItem(AI_STATUS_CACHE_KEY));
             if (cached && cached.txHash === txHash && cached.headline && cached.detail) {
@@ -450,6 +484,9 @@ async function requestAIStatus(forceRefresh = false) {
     }
 
     try {
+        const financialContext =
+            buildFinancialContext();
+
         const response =
             await fetch(
                 "/.netlify/functions/financial-status",
