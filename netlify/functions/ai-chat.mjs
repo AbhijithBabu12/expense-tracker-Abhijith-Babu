@@ -109,11 +109,7 @@ IMPORTANT RULES:
 
 Verified financial context:
 
-${JSON.stringify(
-    financialContext,
-    null,
-    2
-)}
+${JSON.stringify(financialContext)}
 `
         };
 
@@ -190,7 +186,8 @@ ${JSON.stringify(
             candidateModels = [
                 "llama-3.3-70b-versatile",
                 "openai/gpt-oss-120b",
-                "openai/gpt-oss-20b"
+                "openai/gpt-oss-20b",
+                "llama-3.1-8b-instant"
             ];
             candidateKeys = [
                 process.env.GROQ_API_KEY,
@@ -235,6 +232,7 @@ ${JSON.stringify(
                                 model,
                                 messages,
                                 temperature: 0.3,
+                                max_tokens: 1024,
                                 stream: true
                             })
                         }
@@ -256,14 +254,27 @@ ${JSON.stringify(
 
         if (!groqResponse) {
             console.error("[ai-chat] All candidate models and API keys failed:", lastErrorText);
+            let userErrorMsg = "AI service temporarily unavailable. Please try again shortly.";
+            try {
+                const parsed = JSON.parse(lastErrorText);
+                if (parsed.error?.message) {
+                    userErrorMsg = parsed.error.message;
+                }
+            } catch (e) {
+                if (lastErrorText) {
+                    userErrorMsg = lastErrorText.slice(0, 200);
+                }
+            }
+
             return new Response(
                 JSON.stringify({
-                    error: "All AI service keys are currently unavailable or rate-limited. Please try again shortly."
+                    error: userErrorMsg
                 }),
                 {
                     status: 502,
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        ...corsHeaders
                     }
                 }
             );

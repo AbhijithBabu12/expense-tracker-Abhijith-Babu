@@ -71,7 +71,7 @@ export function buildFinancialContext() {
         const itemizedTxs = monthTxs
             .slice()
             .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
-            .slice(0, 50)
+            .slice(0, 15)
             .map(t => ({
                 date: String(t.date || ""),
                 type: String(t.type || "expense"),
@@ -86,7 +86,7 @@ export function buildFinancialContext() {
                     .map(t => String(t.description ?? "").trim())
                     .filter(Boolean)
             )
-        ];
+        ].slice(0, 20);
 
         return {
             month: ym,
@@ -119,26 +119,13 @@ export function buildFinancialContext() {
     const currentMonthObj =
         monthlyBreakdowns.find(m => m.label === currentMonthLabel) ||
         monthlyBreakdowns[0] ||
-        { income: 0, expenses: 0, balance: 0, savingsRate: 0, categories: [], itemizedTransactions: [] };
+        { income: 0, expenses: 0, balance: 0, savingsRate: 0, categories: [] };
 
     const previousMonthLabel = getPreviousMonthLabel();
     const previousMonthObj =
         monthlyBreakdowns.find(m => m.label === previousMonthLabel) ||
         monthlyBreakdowns[1] ||
-        { income: 0, expenses: 0, balance: 0, savingsRate: 0, categories: [], itemizedTransactions: [] };
-
-    // 4. Sample of recent transactions across months
-    const recentSample = transactions
-        .slice()
-        .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
-        .slice(0, 30)
-        .map(t => ({
-            date: String(t.date || ""),
-            type: String(t.type || "expense"),
-            category: String(t.category || "General"),
-            amount: Number(t.amount) || 0,
-            description: String(t.description || "")
-        }));
+        { income: 0, expenses: 0, balance: 0, savingsRate: 0, categories: [] };
 
     return {
         period: {
@@ -165,7 +152,7 @@ export function buildFinancialContext() {
                         .map(t => String(t.description ?? "").trim())
                         .filter(Boolean)
                 )
-            ]
+            ].slice(0, 25)
         },
 
         monthlyBreakdowns,
@@ -176,8 +163,7 @@ export function buildFinancialContext() {
             expenses: currentMonthObj.expenses,
             balance: currentMonthObj.balance,
             savingsRate: currentMonthObj.savingsRate,
-            categories: currentMonthObj.categories,
-            itemizedTransactions: currentMonthObj.itemizedTransactions
+            categories: currentMonthObj.categories
         },
 
         previousMonth: {
@@ -186,8 +172,7 @@ export function buildFinancialContext() {
             expenses: previousMonthObj.expenses,
             balance: previousMonthObj.balance,
             savingsRate: previousMonthObj.savingsRate,
-            categories: previousMonthObj.categories,
-            itemizedTransactions: previousMonthObj.itemizedTransactions
+            categories: previousMonthObj.categories
         },
 
         comparison: {
