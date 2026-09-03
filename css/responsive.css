@@ -270,7 +270,8 @@
     }
 
     .area-chart-svg {
-        min-width: 320px;
+        min-width: unset;
+        max-height: 190px;
     }
 }
 

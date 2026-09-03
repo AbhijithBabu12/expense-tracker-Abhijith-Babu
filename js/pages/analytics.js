@@ -444,23 +444,28 @@ function createAreaChart(expenseTrend, incomeTrend) {
     const incomeValues =
         allLabels.map(l => incomeMap[l] || 0);
 
-    const maxValue =
+    const rawMax =
         Math.max(
             ...expenseValues,
             ...incomeValues,
             1
         );
 
-    const chartWidth = 600;
-    const chartHeight = 200;
-    const paddingX = 0;
-    const paddingY = 10;
+    // Provide 25% headroom so the peak doesn't slam into the top ceiling
+    const maxValue = rawMax * 1.25;
+
+    const chartWidth = 720;
+    const chartHeight = 210;
+    const paddingLeft = 54;
+    const paddingRight = 36;
+    const paddingTop = 20;
+    const paddingBottom = 28;
 
     const plotWidth =
-        chartWidth - paddingX * 2;
+        chartWidth - paddingLeft - paddingRight;
 
     const plotHeight =
-        chartHeight - paddingY * 2;
+        chartHeight - paddingTop - paddingBottom;
 
     const pointCount = allLabels.length;
 
@@ -469,40 +474,106 @@ function createAreaChart(expenseTrend, incomeTrend) {
             ? plotWidth / (pointCount - 1)
             : plotWidth;
 
-    function buildPath(values) {
-
-        return values.map((value, i) => {
-
-            const x =
-                paddingX + i * step;
-
-            const y =
-                paddingY +
-                plotHeight -
-                (value / maxValue) * plotHeight;
-
-            return `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`;
-
-        }).join(" ");
-
+    function getPoint(val, i) {
+        const x = paddingLeft + (pointCount > 1 ? i * step : plotWidth / 2);
+        const y = paddingTop + plotHeight - (val / maxValue) * plotHeight;
+        return { x, y };
     }
 
-    function buildArea(values) {
+    // Smooth cubic spline curve
+    function buildSmoothPath(values) {
+        if (values.length === 0) return "";
+        const points = values.map((val, i) => getPoint(val, i));
 
-        const linePath =
-            buildPath(values);
+        if (points.length === 1) {
+            return `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`;
+        }
 
-        const lastX =
-            paddingX + (pointCount - 1) * step;
+        if (points.length === 2) {
+            return `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)} L ${points[1].x.toFixed(1)} ${points[1].y.toFixed(1)}`;
+        }
 
-        return `${linePath} L ${lastX.toFixed(1)} ${chartHeight} L ${paddingX} ${chartHeight} Z`;
+        let d = `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`;
+        for (let i = 0; i < points.length - 1; i++) {
+            const p0 = points[Math.max(0, i - 1)];
+            const p1 = points[i];
+            const p2 = points[i + 1];
+            const p3 = points[Math.min(points.length - 1, i + 2)];
 
+            const cp1x = p1.x + (p2.x - p0.x) / 6;
+            const cp1y = p1.y + (p2.y - p0.y) / 6;
+            const cp2x = p2.x - (p3.x - p1.x) / 6;
+            const cp2y = p2.y - (p3.y - p1.y) / 6;
+
+            d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+        }
+        return d;
     }
 
-    const expenseLine = buildPath(expenseValues);
-    const expenseArea = buildArea(expenseValues);
-    const incomeLine = buildPath(incomeValues);
-    const incomeArea = buildArea(incomeValues);
+    function buildSmoothArea(values) {
+        const linePath = buildSmoothPath(values);
+        if (!linePath) return "";
+        const firstX = paddingLeft;
+        const lastX = paddingLeft + (pointCount > 1 ? (pointCount - 1) * step : plotWidth / 2);
+        const baseY = paddingTop + plotHeight;
+        return `${linePath} L ${lastX.toFixed(1)} ${baseY.toFixed(1)} L ${firstX.toFixed(1)} ${baseY.toFixed(1)} Z`;
+    }
+
+    function buildDots(values, color) {
+        return values.map((val, i) => {
+            const pt = getPoint(val, i);
+            return `
+                <circle
+                    cx="${pt.x.toFixed(1)}"
+                    cy="${pt.y.toFixed(1)}"
+                    r="4"
+                    fill="${color}"
+                    stroke="var(--color-surface)"
+                    stroke-width="2"
+                    class="area-dot"
+                >
+                    <title>${allLabels[i]}: ₹${val.toLocaleString("en-IN")}</title>
+                </circle>
+            `;
+        }).join("");
+    }
+
+    const expenseLine = buildSmoothPath(expenseValues);
+    const expenseArea = buildSmoothArea(expenseValues);
+    const incomeLine = buildSmoothPath(incomeValues);
+    const incomeArea = buildSmoothArea(incomeValues);
+
+    const incomeDots = buildDots(incomeValues, "hsl(170, 42%, 48%)");
+    const expenseDots = buildDots(expenseValues, "hsl(345, 44%, 62%)");
+
+    // Grid lines & Y-axis levels
+    const gridLevels = [
+        { val: rawMax },
+        { val: Math.round(rawMax / 2) },
+        { val: 0 }
+    ];
+
+    const gridMarkup = gridLevels.map(lvl => {
+        const y = paddingTop + plotHeight - (lvl.val / maxValue) * plotHeight;
+        const formattedVal = formatCompactNumber(lvl.val);
+        return `
+            <g class="chart-grid-row">
+                <text
+                    x="${paddingLeft - 10}"
+                    y="${(y + 3).toFixed(1)}"
+                    text-anchor="end"
+                    class="area-chart-y-label"
+                >₹${formattedVal}</text>
+                <line
+                    x1="${paddingLeft}"
+                    y1="${y.toFixed(1)}"
+                    x2="${(chartWidth - paddingRight).toFixed(1)}"
+                    y2="${y.toFixed(1)}"
+                    class="area-grid-line"
+                />
+            </g>
+        `;
+    }).join("");
 
     // X-axis labels — show at most 8
     const labelInterval =
@@ -514,18 +585,18 @@ function createAreaChart(expenseTrend, incomeTrend) {
                 i % labelInterval === 0 ||
                 i === pointCount - 1
             )
-            .map((label, i, arr) => {
+            .map(label => {
 
                 const originalIndex =
                     allLabels.indexOf(label);
 
                 const x =
-                    paddingX + originalIndex * step;
+                    paddingLeft + (pointCount > 1 ? originalIndex * step : plotWidth / 2);
 
                 return `
                     <text
                         x="${x.toFixed(1)}"
-                        y="${chartHeight + 18}"
+                        y="${chartHeight - 6}"
                         text-anchor="middle"
                         class="area-chart-label"
                     >${escapeHTML(label)}</text>
@@ -553,29 +624,34 @@ function createAreaChart(expenseTrend, incomeTrend) {
 
             <div class="area-chart-wrapper">
                 <svg
-                    viewBox="0 0 ${chartWidth} ${chartHeight + 28}"
+                    viewBox="0 0 ${chartWidth} ${chartHeight}"
                     class="area-chart-svg"
-                    preserveAspectRatio="none"
+                    preserveAspectRatio="xMidYMid meet"
                     aria-hidden="true"
                 >
                     <defs>
                         <linearGradient id="grad-income" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="hsl(170, 42%, 48%)" stop-opacity="0.28" />
-                            <stop offset="100%" stop-color="hsl(170, 42%, 48%)" stop-opacity="0.02" />
+                            <stop offset="0%" stop-color="hsl(170, 42%, 48%)" stop-opacity="0.22" />
+                            <stop offset="100%" stop-color="hsl(170, 42%, 48%)" stop-opacity="0.01" />
                         </linearGradient>
                         <linearGradient id="grad-expense" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="hsl(345, 44%, 62%)" stop-opacity="0.28" />
-                            <stop offset="100%" stop-color="hsl(345, 44%, 62%)" stop-opacity="0.02" />
+                            <stop offset="0%" stop-color="hsl(345, 44%, 62%)" stop-opacity="0.22" />
+                            <stop offset="100%" stop-color="hsl(345, 44%, 62%)" stop-opacity="0.01" />
                         </linearGradient>
                     </defs>
 
-                    <!-- Income -->
+                    <!-- Background Grid -->
+                    ${gridMarkup}
+
+                    <!-- Income Area & Line -->
                     <path d="${incomeArea}" fill="url(#grad-income)" class="area-fill" />
                     <path d="${incomeLine}" fill="none" stroke="hsl(170, 42%, 48%)" stroke-width="2.5" stroke-linejoin="round" class="area-line" />
+                    ${incomeDots}
 
-                    <!-- Expense -->
+                    <!-- Expense Area & Line -->
                     <path d="${expenseArea}" fill="url(#grad-expense)" class="area-fill" />
                     <path d="${expenseLine}" fill="none" stroke="hsl(345, 44%, 62%)" stroke-width="2.5" stroke-linejoin="round" class="area-line" />
+                    ${expenseDots}
 
                     <!-- X-axis labels -->
                     ${xLabels}
@@ -809,6 +885,17 @@ function formatCurrency(value) {
 function formatPercent(value) {
 
     return `${value.toFixed(1)}%`;
+
+}
+
+
+function formatCompactNumber(number) {
+
+    if (!number || Number.isNaN(number)) return "0";
+    if (number >= 10000000) return `${(number / 10000000).toFixed(1)}Cr`;
+    if (number >= 100000) return `${(number / 100000).toFixed(1)}L`;
+    if (number >= 1000) return `${(number / 1000).toFixed(0)}k`;
+    return Math.round(number);
 
 }
 
