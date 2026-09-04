@@ -1,0 +1,631 @@
+#navbar {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+
+    width: calc(100% - 48px);
+    max-width: var(--max-width);
+
+    background: rgba(255, 255, 255, 0.3);
+
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 32px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.navbar {
+    margin: 0 auto;
+    padding: 12px 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    color: var(--color-text-primary);
+
+    font-size: 20px;
+    font-weight: 600;
+
+    letter-spacing: 0;
+
+    text-decoration: none;
+}
+
+.logo img {
+    width: 48px;
+    height: 48px;
+
+    object-fit: contain;
+
+    border-radius: 8px;
+}
+
+.secondary-button {
+    padding: 15px 20px;
+
+    background: #eeeeef;
+    color: var(--color-text-primary);
+
+    border-radius: 12px;
+
+    font-size: 15px;
+    font-weight: 500;
+
+    transition:
+        background var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.secondary-button:hover {
+    background: #e1e1e4;
+}
+
+.secondary-button:active {
+    transform: scale(0.99);
+}
+
+.danger-button {
+    padding: 15px 20px;
+
+    background: var(--color-danger);
+    color: white;
+
+    border-radius: 12px;
+
+    font-size: 15px;
+    font-weight: 500;
+
+    transition:
+        opacity var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.danger-button:hover {
+    opacity: 0.9;
+}
+
+.danger-button:active {
+    transform: scale(0.99);
+}
+
+.compact-button {
+    width: auto;
+
+    padding: 11px 14px;
+
+    font-size: 13px;
+}
+
+.app-toast {
+    position: fixed;
+    top: 40px;
+    left: 50%;
+    z-index: 300;
+
+    max-width: min(360px, calc(100vw - 32px));
+    
+    padding: 14px 28px;
+    
+    background: var(--color-text-primary);
+    color: white;
+    
+    border-radius: 999px;
+    
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.4;
+    text-align: center;
+    white-space: nowrap;
+
+    opacity: 0;
+    pointer-events: none;
+    
+    transform: translate(-50%, -20px);
+    
+    transition: 
+        opacity var(--transition-normal),
+        transform var(--transition-normal);
+
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.app-toast.visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    pointer-events: auto;
+}
+
+.app-toast.error {
+    background: var(--color-danger);
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+
+    background: rgba(29, 29, 31, 0.38);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Hide mobile floating AI button when any modal/drawer is open */
+body:has(.modal-backdrop:not(.hidden)) .mobile-ai-button {
+    display: none !important;
+}
+
+.modal {
+    width: min(680px, 100%);
+    max-height: calc(100vh - 48px);
+
+    overflow-y: auto;
+
+    padding: 28px;
+
+    background: var(--color-surface);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-large);
+
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2);
+}
+
+.small-modal {
+    width: min(460px, 100%);
+}
+
+.modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+
+    margin-bottom: 28px;
+}
+
+.modal-header h3 {
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.modal-close {
+    width: 36px;
+    height: 36px;
+
+    background: #eeeeef;
+    color: var(--color-text-secondary);
+
+    border-radius: 10px;
+
+    font-size: 18px;
+}
+
+.modal-close:hover {
+    color: var(--color-text-primary);
+}
+
+.modal-copy {
+    margin: -10px 0 24px;
+
+    color: var(--color-text-secondary);
+
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+#edit-transaction-form {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.edit-type-group {
+    margin-bottom: 0;
+}
+
+.amount-input-wrapper.compact input {
+    height: 64px;
+
+    padding-left: 54px;
+
+    font-size: 28px;
+}
+
+.amount-input-wrapper.compact .currency-symbol {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.modal-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+
+    margin-top: 4px;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-link {
+    padding: 8px 14px;
+
+    background: transparent;
+    color: var(--color-text-secondary);
+
+    border-radius: 999px;
+
+    font-size: 14px;
+
+    transition:
+        background var(--transition-fast),
+        color var(--transition-fast);
+}
+
+.nav-link:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--color-text-primary);
+}
+
+.nav-link.active {
+    background: var(--color-text-primary);
+    color: white;
+}
+
+
+/* Buttons */
+
+.primary-button {
+    width: 100%;
+
+    padding: 15px 20px;
+
+    background: var(--color-accent);
+    color: white;
+
+    border-radius: 12px;
+
+    font-size: 15px;
+    font-weight: 500;
+
+    transition:
+        background var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.primary-button:hover {
+    background: var(--color-accent-hover);
+}
+
+.primary-button:active {
+    transform: scale(0.99);
+}
+
+.text-button {
+    background: transparent;
+    color: var(--color-text-primary);
+
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.text-button:hover {
+    text-decoration: underline;
+}
+
+/* =========================================
+   MOBILE AI BUTTON
+========================================= */
+
+.mobile-ai-button {
+    position: fixed;
+
+    right: 20px;
+    bottom: 20px;
+
+    z-index: 1000;
+
+    width: 54px;
+    height: 54px;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 50%;
+
+    background: var(--color-text-primary);
+    color: white;
+
+    font-size: 22px;
+
+    cursor: pointer;
+
+    box-shadow: var(--shadow-card);
+
+    transition:
+        transform var(--transition-fast),
+        opacity var(--transition-fast);
+}
+
+.mobile-ai-button:hover {
+    transform: translateY(-2px);
+}
+
+.mobile-ai-button:active {
+    transform: scale(0.95);
+}
+
+@media (max-width: 700px) {
+
+    .mobile-ai-button {
+        display: flex;
+    }
+
+}
+
+/* =========================================================
+   CUSTOM ANIMATED DROPDOWNS ("SLIDERS")
+   ========================================================= */
+
+.custom-dropdown-container {
+    position: relative;
+    width: 100%;
+}
+
+.native-hidden-select {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.custom-dropdown-trigger {
+    width: 100%;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 0 16px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: 15px;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+.custom-dropdown-trigger:hover {
+    border-color: rgba(0, 0, 0, 0.22);
+    background: var(--color-background);
+}
+
+.custom-dropdown-trigger:focus,
+.custom-dropdown-trigger[aria-expanded="true"] {
+    border-color: var(--color-border-focus);
+    box-shadow: var(--shadow-focus);
+    outline: none;
+}
+
+.custom-dropdown-trigger[aria-expanded="true"] .custom-dropdown-chevron {
+    transform: rotate(180deg);
+}
+
+.custom-dropdown-selected {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.custom-dropdown-chevron {
+    flex-shrink: 0;
+    color: var(--color-text-muted);
+    transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cat-pill-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.cat-item-icon {
+    font-size: 15px;
+    width: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Floating animated dropdown menu */
+.custom-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 1500;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+    padding: 6px;
+    max-height: 240px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    animation: dropdownSlideDown 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.custom-dropdown-menu.dropup {
+    top: auto;
+    bottom: calc(100% + 8px);
+    animation: dropdownSlideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes dropdownSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes dropdownSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes dropdownSlideUpCentered {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 8px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
+}
+
+@keyframes mobileDropdownSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.custom-dropdown-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 12px;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.custom-dropdown-item:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.custom-dropdown-item.active {
+    background: rgba(0, 0, 0, 0.07);
+    font-weight: 600;
+}
+
+.custom-dropdown-item-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.custom-dropdown-item .item-check {
+    opacity: 0;
+    color: var(--color-text-primary);
+    font-size: 13px;
+    font-weight: 700;
+    transition: opacity var(--transition-fast);
+}
+
+.custom-dropdown-item.active .item-check {
+    opacity: 1;
+}
+
+/* Danger Action Button (Clear All) */
+.danger-button-subtle {
+    color: #e53935;
+    border-color: rgba(229, 57, 53, 0.28);
+    background: rgba(229, 57, 53, 0.04);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all var(--transition-fast);
+}
+
+.danger-button-subtle:hover:not(:disabled) {
+    background: rgba(229, 57, 53, 0.12);
+    border-color: rgba(229, 57, 53, 0.6);
+    color: #d32f2f;
+    transform: translateY(-1px);
+}
+
+.danger-button-subtle:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.danger-button-subtle:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    border-color: var(--color-border);
+    color: var(--color-text-muted);
+    background: transparent;
+    pointer-events: none;
+}
+
+.danger-eyebrow {
+    color: #e53935 !important;
+}

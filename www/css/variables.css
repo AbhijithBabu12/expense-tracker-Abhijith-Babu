@@ -1,0 +1,45 @@
+:root {
+
+    /* Typography */
+    --font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "SF Pro Text",
+        "Segoe UI",
+        sans-serif;
+
+    /* Colors */
+    --color-background: #f7f7f5;
+    --color-surface: #ffffff;
+    --color-text-primary: #1d1d1f;
+    --color-text-secondary: #6e6e73;
+    --color-text-muted: #98989d;
+
+    --color-border: #e5e5e7;
+    --color-border-focus: #b8b8bd;
+
+    --color-accent: #1d1d1f;
+    --color-accent-hover: #333336;
+
+    --color-success: #248a3d;
+    --color-danger: #d70015;
+
+    /* Layout */
+    --max-width: 1180px;
+    --content-width: 720px;
+
+    /* Radius */
+    --radius-small: 10px;
+    --radius-medium: 16px;
+    --radius-large: 24px;
+
+    /* Shadows */
+    --shadow-card:
+        0 10px 40px rgba(0, 0, 0, 0.05);
+
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-normal: 250ms ease;
+
+}

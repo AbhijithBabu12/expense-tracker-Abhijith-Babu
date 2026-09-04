@@ -8,14 +8,18 @@ const ALLOWED_ORIGINS = [
     "https://meowth-smart.netlify.app",
     "http://localhost:8888",
     "capacitor://localhost",
-    "http://localhost" // Used by some Android capacitor builds
+    "http://localhost",
+    "https://localhost"
 ];
 
 export default async (req) => {
 
     const origin = req.headers.get("origin");
-    const isAllowed = ALLOWED_ORIGINS.includes(origin);
-    const corsOrigin = isAllowed ? origin : "https://meowth-smart.netlify.app";
+    const isAllowed =
+        !origin ||
+        ALLOWED_ORIGINS.includes(origin) ||
+        (typeof origin === "string" && (origin.includes("localhost") || origin.endsWith("netlify.app")));
+    const corsOrigin = isAllowed ? (origin || "*") : "https://meowth-smart.netlify.app";
 
     const corsHeaders = {
         "Access-Control-Allow-Origin": corsOrigin,

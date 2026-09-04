@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MeowthApp</string>
+    <string name="title_activity_main">MeowthApp</string>
+    <string name="package_name">com.abhijith.meowth</string>
+    <string name="custom_url_scheme">com.abhijith.meowth</string>
+</resources>

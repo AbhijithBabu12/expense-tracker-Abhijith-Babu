@@ -1,0 +1,28 @@
+{
+  "name": "meowth",
+  "version": "1.0.0",
+  "description": "<div align=\"center\">\r   <img src=\"Logo/giphy.gif\"\" alt=\"Blissey Logo\" width=\"150\" />",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "powershell -Command \"Copy-Item index.html www/; Copy-Item -Recurse -Force css, js, Logo www/\"",
+    "sync": "npm run build && npx cap sync android"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AbhijithBabu12/expense-tracker-Abhijith-Babu.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AbhijithBabu12/expense-tracker-Abhijith-Babu/issues"
+  },
+  "homepage": "https://github.com/AbhijithBabu12/expense-tracker-Abhijith-Babu#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/cli": "^8.5.1",
+    "@capacitor/core": "^8.5.1"
+  }
+}
