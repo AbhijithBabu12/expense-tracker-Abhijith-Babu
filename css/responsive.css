@@ -392,6 +392,16 @@
         left: 20px;
     }
 
+    .ai-history-btn {
+        top: 120px;
+        right: 20px;
+    }
+
+    .ai-history-panel {
+        top: 170px;
+        right: 20px;
+    }
+
     .ai-messages {
         padding: 175px 20px 150px;
     }
@@ -429,6 +439,19 @@
         left: 18px;
         padding: 7px 14px;
         font-size: 12px;
+    }
+
+    .ai-history-btn {
+        top: 120px;
+        right: 18px;
+        padding: 7px 14px;
+        font-size: 12px;
+    }
+
+    .ai-history-panel {
+        top: 165px;
+        right: 18px;
+        width: calc(100% - 36px);
     }
 
     .ai-messages {

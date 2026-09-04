@@ -4,13 +4,24 @@ const GROQ_API_URL =
 const MODEL =
     "llama-3.3-70b-versatile";
 
-const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
+const ALLOWED_ORIGINS = [
+    "https://meowth-smart.netlify.app",
+    "http://localhost:8888",
+    "capacitor://localhost",
+    "http://localhost" // Used by some Android capacitor builds
+];
 
 export default async (req) => {
+
+    const origin = req.headers.get("origin");
+    const isAllowed = ALLOWED_ORIGINS.includes(origin);
+    const corsOrigin = isAllowed ? origin : "https://meowth-smart.netlify.app";
+
+    const corsHeaders = {
+        "Access-Control-Allow-Origin": corsOrigin,
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    };
 
     if (req.method === "OPTIONS") {
         return new Response(null, {

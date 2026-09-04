@@ -12,6 +12,8 @@ let conversationStarted = false;
  * can reference earlier messages in the chat.
  */
 let chatHistory = [];
+let chatHistoryList = JSON.parse(localStorage.getItem("meowth_chat_history")) || [];
+let currentSessionId = crypto.randomUUID();
 
 const AI_MODEL_STORAGE_KEY = "meowth_selected_ai_model";
 let savedModel = localStorage.getItem(AI_MODEL_STORAGE_KEY);
@@ -67,6 +69,21 @@ function renderAI() {
                 <span>＋</span>
                 New chat
             </button>
+
+            <button
+                type="button"
+                id="ai-history-btn"
+                class="ai-history-btn"
+                title="View chat history"
+            >
+                History
+                <span>◷</span>
+            </button>
+
+            <div id="ai-history-panel" class="ai-history-panel">
+                <div class="ai-history-header">Chat History</div>
+                <div id="ai-history-list" class="ai-history-list"></div>
+            </div>
 
             <main
                 id="ai-messages"
@@ -341,6 +358,24 @@ function setupAIEvents() {
 
     }
 
+    const historyBtn = document.getElementById("ai-history-btn");
+    const historyPanel = document.getElementById("ai-history-panel");
+
+    if (historyBtn && historyPanel) {
+        historyBtn.addEventListener("click", e => {
+            e.stopPropagation();
+            historyPanel.classList.toggle("active");
+        });
+
+        document.addEventListener("click", e => {
+            if (!e.target.closest("#ai-history-panel") && !e.target.closest("#ai-history-btn")) {
+                historyPanel.classList.remove("active");
+            }
+        });
+    }
+
+    renderHistoryList();
+
     const modelTrigger =
         document.getElementById("ai-model-trigger");
 
@@ -571,6 +606,7 @@ async function handleSubmit(event) {
                 role: "assistant",
                 content: fullResponse
             });
+            saveSession();
         }
 
 
@@ -598,6 +634,7 @@ async function handleSubmit(event) {
                     role: "assistant",
                     content: partial
                 });
+                saveSession();
             } else {
                 updateAssistantMessage(
                     assistantMessage,
@@ -1028,6 +1065,121 @@ function hideEmptyState() {
 }
 
 
+function renderHistoryList() {
+    const list = document.getElementById("ai-history-list");
+    if (!list) return;
+
+    if (chatHistoryList.length === 0) {
+        list.innerHTML = `<div style="padding: 16px; color: var(--color-text-tertiary); text-align: center; font-size: 13px;">No past chats yet.</div>`;
+        return;
+    }
+
+    const sorted = [...chatHistoryList].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    list.innerHTML = sorted.map(session => `
+        <button type="button" class="ai-history-item" data-session-id="${session.id}">
+            <div class="ai-history-item-content">
+                <div class="ai-history-item-title">${escapeHTML(session.title || "New Chat")}</div>
+                <div class="ai-history-item-date">${new Date(session.date).toLocaleDateString()}</div>
+            </div>
+            <div class="ai-history-delete-btn" data-delete-id="${session.id}" title="Delete chat">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+            </div>
+        </button>
+    `).join("");
+
+    list.querySelectorAll(".ai-history-item").forEach(item => {
+        item.addEventListener("click", (e) => {
+            if (e.target.closest(".ai-history-delete-btn")) return;
+            loadSession(item.dataset.sessionId);
+        });
+    });
+
+    list.querySelectorAll(".ai-history-delete-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            deleteSession(btn.dataset.deleteId);
+        });
+    });
+}
+
+function saveSession() {
+    if (chatHistory.length === 0) return;
+
+    const sessionIndex = chatHistoryList.findIndex(s => s.id === currentSessionId);
+    let title = "New Chat";
+    
+    const firstUserMsg = chatHistory.find(m => m.role === "user");
+    if (firstUserMsg && firstUserMsg.content) {
+        title = firstUserMsg.content.length > 25 ? firstUserMsg.content.substring(0, 25) + "..." : firstUserMsg.content;
+    }
+
+    const sessionData = {
+        id: currentSessionId,
+        date: new Date().toISOString(),
+        messages: chatHistory,
+        title: title
+    };
+
+    if (sessionIndex > -1) {
+        chatHistoryList[sessionIndex] = sessionData;
+    } else {
+        chatHistoryList.push(sessionData);
+    }
+
+    localStorage.setItem("meowth_chat_history", JSON.stringify(chatHistoryList));
+    renderHistoryList();
+}
+
+function loadSession(id) {
+    const session = chatHistoryList.find(s => s.id === id);
+    if (!session) return;
+
+    if (isLoading && abortController) {
+        abortController.abort();
+        isLoading = false;
+        abortController = null;
+    }
+
+    currentSessionId = id;
+    chatHistory = [...session.messages];
+    conversationStarted = true;
+    
+    renderAI();
+    hideEmptyState();
+
+    const messagesContainer = document.getElementById("ai-messages");
+    if (!messagesContainer) return;
+
+    chatHistory.forEach(msg => {
+        if (msg.role === "user") {
+            addUserMessage(msg.content);
+        } else {
+            const assistantWrapper = addAssistantMessage();
+            updateAssistantMessage(assistantWrapper, msg.content);
+        }
+    });
+
+    const historyPanel = document.getElementById("ai-history-panel");
+    if (historyPanel) historyPanel.classList.remove("active");
+    
+    scrollMessagesToBottom();
+}
+
+function deleteSession(id) {
+    chatHistoryList = chatHistoryList.filter(s => s.id !== id);
+    localStorage.setItem("meowth_chat_history", JSON.stringify(chatHistoryList));
+    renderHistoryList();
+
+    if (currentSessionId === id) {
+        startNewConversation();
+    }
+}
+
+
 function startNewConversation() {
 
     /*
@@ -1040,14 +1192,10 @@ function startNewConversation() {
     }
 
 
-    conversationStarted =
-        false;
+    conversationStarted = false;
 
-    /*
-     * Clear conversation memory.
-     */
     chatHistory = [];
-
+    currentSessionId = crypto.randomUUID();
 
     renderAI();
 
