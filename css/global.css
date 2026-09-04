@@ -6,12 +6,12 @@
 
 html {
     scroll-behavior: smooth;
+    background-color: var(--color-background, #f7f7f5);
 }
 
 body {
     min-height: 100vh;
-
-    background: var(--color-background);
+    background-color: var(--color-background, #f7f7f5);
     color: var(--color-text-primary);
 
     font-family: var(--font-family);

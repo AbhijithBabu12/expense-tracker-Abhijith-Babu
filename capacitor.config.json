@@ -1,5 +1,6 @@
 {
   "appId": "com.abhijith.meowth",
   "appName": "Meowth",
-  "webDir": "www"
+  "webDir": "www",
+  "backgroundColor": "#f7f7f5"
 }
