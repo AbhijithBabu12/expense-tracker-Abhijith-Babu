@@ -20,9 +20,34 @@
   </head>
 
   <body>
+    <!-- App Loading Screen (Animated Meowth GIF) -->
+    <div id="app-splash-screen" class="app-splash-screen" aria-hidden="true">
+      <div class="splash-content">
+        <img src="Logo/giphy.gif" alt="Meowth Loading" class="splash-logo" />
+        <h2 class="splash-title">Meowth</h2>
+        <div class="splash-loader">
+          <span class="splash-dot"></span>
+          <span class="splash-dot"></span>
+          <span class="splash-dot"></span>
+        </div>
+      </div>
+    </div>
+
     <div id="app">
       <!-- Navigation -->
       <header id="navbar"></header>
+      <button
+        type="button"
+        id="nav-summon-btn"
+        class="nav-summon-btn"
+        aria-label="Show navigation menu"
+        title="Show navigation"
+      >
+        <img src="Logo/giphy.gif" alt="" class="nav-summon-logo" />
+        <svg class="nav-summon-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
 
       <!-- Main application -->
       <main id="main-content">

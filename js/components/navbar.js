@@ -55,6 +55,7 @@ export function renderNavbar() {
 
     setupNavigation();
     setupMobileAI();
+    setupNavbarScroll();
 
     // Set initial page cleanly without smooth-scroll jump
     navigateTo(initialPage, false, false);
@@ -152,6 +153,11 @@ export function navigateTo(pageName, updateHash = true, smoothScroll = true) {
         window.location.hash = pageName;
     }
 
+    const navbar = document.getElementById("navbar");
+    const summonBtn = document.getElementById("nav-summon-btn");
+    if (navbar) navbar.classList.remove("nav-hidden");
+    if (summonBtn) summonBtn.classList.remove("visible");
+
     if (smoothScroll) {
         window.scrollTo({
             top: 0,
@@ -199,3 +205,94 @@ function getSavedPage() {
     return "home";
 
 }
+
+
+function setupNavbarScroll() {
+
+    const navbar = document.getElementById("navbar");
+    const summonBtn = document.getElementById("nav-summon-btn");
+
+    if (!navbar || !summonBtn) {
+        return;
+    }
+
+    let lastWindowScrollY = window.scrollY;
+    let lastAiScrollY = 0;
+    let isTicking = false;
+
+    function hideNav() {
+        navbar.classList.add("nav-hidden");
+        document.body.classList.add("nav-hidden");
+        summonBtn.classList.add("visible");
+    }
+
+    function showNav() {
+        navbar.classList.remove("nav-hidden");
+        document.body.classList.remove("nav-hidden");
+        summonBtn.classList.remove("visible");
+    }
+
+    function handleScroll(event) {
+
+        if (!isTicking) {
+
+            window.requestAnimationFrame(() => {
+
+                const activePage = document.body.getAttribute("data-active-page");
+
+                if (activePage === "ai") {
+                    const aiMessages = document.getElementById("ai-messages");
+                    if (aiMessages) {
+                        const currentY = aiMessages.scrollTop;
+                        const delta = currentY - lastAiScrollY;
+
+                        // Near the top of chat -> show full header
+                        if (currentY <= 30) {
+                            showNav();
+                        }
+                        // Scrolling DOWN -> hide navbar + new chat + history, reveal summon button
+                        else if (delta > 8 && currentY > 60) {
+                            hideNav();
+                        }
+
+                        lastAiScrollY = currentY;
+                    }
+                } else {
+                    const currentY = window.scrollY;
+                    const delta = currentY - lastWindowScrollY;
+
+                    // Near the top of page -> show full header
+                    if (currentY <= 45) {
+                        showNav();
+                    }
+                    // Scrolling DOWN -> smoothly hide navbar, reveal summon button
+                    else if (delta > 8 && currentY > 80) {
+                        hideNav();
+                    }
+
+                    lastWindowScrollY = currentY;
+                }
+
+                isTicking = false;
+
+            });
+
+            isTicking = true;
+
+        }
+
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    document.addEventListener("scroll", handleScroll, { passive: true, capture: true });
+
+    // Tapping the floating arrow button summons navbar + action buttons from anywhere!
+    summonBtn.addEventListener("click", event => {
+
+        event.preventDefault();
+        showNav();
+
+    });
+
+}
+

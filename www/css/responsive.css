@@ -532,6 +532,25 @@
         width: calc(100% - 32px);
     }
 
+    .ai-history-delete-btn {
+        opacity: 0.85 !important;
+        padding: 8px !important;
+    }
+
+    .ai-composer {
+        padding: 10px 12px 8px 14px;
+        border-radius: 18px;
+    }
+
+    .ai-composer textarea {
+        font-size: 14px;
+        min-height: 32px;
+    }
+
+    .ai-composer-actions {
+        margin-top: 2px;
+    }
+
     .ai-model-pill-btn {
         padding: 0 9px;
         height: 34px;

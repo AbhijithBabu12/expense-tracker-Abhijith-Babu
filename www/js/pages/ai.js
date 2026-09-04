@@ -1,4 +1,5 @@
 import { buildFinancialContext } from "../ai/contextBuilder.js";
+import { showNotification } from "../components/notifications.js";
 
 
 let isLoading = false;
@@ -1069,9 +1070,92 @@ function hideEmptyState() {
 }
 
 
+let pendingDeleteSessionId = null;
+
+function createChatDeleteModal() {
+    if (document.getElementById("ai-delete-modal")) return;
+
+    const modal = document.createElement("div");
+    modal.id = "ai-delete-modal";
+    modal.className = "modal-backdrop hidden";
+
+    modal.innerHTML = `
+        <div class="modal small-modal" role="dialog" aria-modal="true" aria-labelledby="ai-delete-modal-title">
+            <div class="modal-header">
+                <div>
+                    <p class="eyebrow">DELETE CHAT</p>
+                    <h3 id="ai-delete-modal-title">Delete conversation?</h3>
+                </div>
+                <button type="button" class="modal-close" data-ai-delete-close aria-label="Close modal">✕</button>
+            </div>
+
+            <p class="modal-copy" id="ai-delete-modal-copy">
+                Are you sure you want to delete this conversation? This action cannot be undone.
+            </p>
+
+            <div class="modal-actions">
+                <button type="button" class="secondary-button" data-ai-delete-close>
+                    Cancel
+                </button>
+                <button type="button" class="danger-button" id="confirm-chat-delete-btn">
+                    Delete
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.addEventListener("click", (e) => {
+        if (e.target.hasAttribute("data-ai-delete-close") || e.target === modal) {
+            closeChatDeleteModal();
+        }
+    });
+
+    const confirmBtn = document.getElementById("confirm-chat-delete-btn");
+    if (confirmBtn) {
+        confirmBtn.addEventListener("click", () => {
+            if (pendingDeleteSessionId) {
+                deleteSession(pendingDeleteSessionId);
+                showNotification("Chat conversation deleted.");
+                pendingDeleteSessionId = null;
+            }
+            closeChatDeleteModal();
+        });
+    }
+}
+
+function openChatDeleteModal(sessionId) {
+    createChatDeleteModal();
+    pendingDeleteSessionId = sessionId;
+
+    const session = chatHistoryList.find(s => s.id === sessionId);
+    const copy = document.getElementById("ai-delete-modal-copy");
+    if (copy && session) {
+        copy.textContent = `Are you sure you want to delete "${session.title || "this chat"}"? This action cannot be undone.`;
+    }
+
+    const modal = document.getElementById("ai-delete-modal");
+    if (modal) {
+        modal.classList.remove("hidden");
+        document.body.classList.add("modal-open");
+    }
+}
+
+function closeChatDeleteModal() {
+    const modal = document.getElementById("ai-delete-modal");
+    if (modal) {
+        modal.classList.add("hidden");
+        document.body.classList.remove("modal-open");
+    }
+    pendingDeleteSessionId = null;
+}
+
 function renderHistoryList() {
     const list = document.getElementById("ai-history-list");
     if (!list) return;
+
+    createChatDeleteModal();
 
     if (chatHistoryList.length === 0) {
         list.innerHTML = `<div style="padding: 16px; color: var(--color-text-tertiary); text-align: center; font-size: 13px;">No past chats yet.</div>`;
@@ -1081,18 +1165,18 @@ function renderHistoryList() {
     const sorted = [...chatHistoryList].sort((a, b) => new Date(b.date) - new Date(a.date));
 
     list.innerHTML = sorted.map(session => `
-        <button type="button" class="ai-history-item" data-session-id="${session.id}">
+        <div class="ai-history-item" data-session-id="${session.id}">
             <div class="ai-history-item-content">
                 <div class="ai-history-item-title">${escapeHTML(session.title || "New Chat")}</div>
                 <div class="ai-history-item-date">${new Date(session.date).toLocaleDateString()}</div>
             </div>
-            <div class="ai-history-delete-btn" data-delete-id="${session.id}" title="Delete chat">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button type="button" class="ai-history-delete-btn" data-delete-id="${session.id}" title="Delete chat" aria-label="Delete chat">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 </svg>
-            </div>
-        </button>
+            </button>
+        </div>
     `).join("");
 
     list.querySelectorAll(".ai-history-item").forEach(item => {
@@ -1105,7 +1189,7 @@ function renderHistoryList() {
     list.querySelectorAll(".ai-history-delete-btn").forEach(btn => {
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
-            deleteSession(btn.dataset.deleteId);
+            openChatDeleteModal(btn.dataset.deleteId);
         });
     });
 }

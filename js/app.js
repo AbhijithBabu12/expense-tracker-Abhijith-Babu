@@ -48,4 +48,15 @@ document.addEventListener("DOMContentLoaded", () => {
         aiContext
     );
 
+    // Smoothly dismiss animated Meowth splash screen
+    const splash = document.getElementById("app-splash-screen");
+    if (splash) {
+        window.setTimeout(() => {
+            splash.classList.add("fade-out");
+            window.setTimeout(() => {
+                splash.remove();
+            }, 500);
+        }, 1200);
+    }
+
 });
